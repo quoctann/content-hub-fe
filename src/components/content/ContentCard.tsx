@@ -71,12 +71,18 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
           </p>
         ) : (
           <div className={`overflow-hidden rounded-lg ${isExpanded ? 'max-h-96' : 'max-h-32'}`}>
-            <img
-              src={item.content}
-              alt={item.title}
-              className="h-full w-full object-cover transition-all"
-              loading="lazy"
-            />
+            {item.content ? (
+              <img
+                src={item.content}
+                alt={item.title}
+                className="h-full w-full object-cover transition-all"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-32 w-full items-center justify-center bg-muted">
+                <Image className="h-10 w-10 text-muted-foreground/50" />
+              </div>
+            )}
           </div>
         )}
 

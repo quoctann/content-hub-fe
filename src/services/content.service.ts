@@ -1,34 +1,35 @@
 /**
  * Content Service
  *
- * This service layer abstracts data fetching from the UI components.
- * Currently uses mock data, but can be easily switched to real API calls.
+ * Service layer that communicates with the Content Hub backend API.
+ * Uses the centralized Axios API client for all HTTP requests.
  *
- * To switch to real backend:
- * 1. Replace mock implementations with actual fetch/axios calls
- * 2. Update the API endpoints as needed
- * 3. Keep the same interface for backward compatibility
+ * Backend API endpoints:
+ * - GET  /contents?q=<query>&type=<type>&tags=<tags>&num=<count>&cursor=<id>  — Search contents
+ * - POST /contents                                      — Create content
+ * - PUT  /contents/:id                                  — Update content
+ *
+ * All requests are authenticated via X-API-Key header (handled by api-client).
  */
 
 import type {
+  ApiContent,
   ContentItem,
+  ContentType,
   SearchFilter,
   SearchResponse,
-  ContentType,
 } from "@/types/content";
-import { mockContentItems } from "@/data/mock-content";
+import { mapApiContent } from "@/types/content";
+import { apiGet } from "@/lib/api-client";
 
-// Simulated API delay for realistic behavior
-const MOCK_DELAY = 300;
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// Default number of results per page
+const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * Parse search query string into structured filter
  * Supports: # for tags, @image/@text for type filtering
  */
 export function parseSearchQuery(query: string): SearchFilter {
-  // const filter: SearchFilter = {};
   const tags: string[] = [];
   const categories: string[] = [];
   let keyword = query;
@@ -65,68 +66,83 @@ export function parseSearchQuery(query: string): SearchFilter {
 }
 
 /**
- * Search content items based on filter criteria
+ * Search content items using the backend API.
+ *
+ * The backend uses cursor-based pagination:
+ * - `q`: search query text
+ * - `num`: number of results to return
+ * - `cursor`: the last item ID from the previous page (for loading more)
+ *
+ * @param filter - Parsed search filter (keyword is sent as `q` param)
+ * @param page - Page number (used to calculate if this is the first page)
+ * @param pageSize - Number of results per page
+ * @param cursor - Cursor for pagination (last item ID from previous results)
  */
 export async function searchContent(
   filter: SearchFilter,
   page: number = 1,
-  pageSize: number = 10,
+  pageSize: number = DEFAULT_PAGE_SIZE,
+  cursor?: string,
 ): Promise<SearchResponse> {
-  await delay(MOCK_DELAY);
+  // Build query parameters for the backend API
+  const params: Record<string, string | number> = {
+    num: pageSize,
+  };
 
-  let filteredItems = [...mockContentItems];
-
-  // Filter by type
-  if (filter.type) {
-    filteredItems = filteredItems.filter((item) => item.type === filter.type);
-  }
-
-  // Filter by tags
-  if (filter.tags && filter.tags.length > 0) {
-    filteredItems = filteredItems.filter((item) =>
-      filter.tags!.some((tag) =>
-        item.tags.some((itemTag) => itemTag.name.toLowerCase().includes(tag)),
-      ),
-    );
-  }
-
-  // Filter by keyword
+  // Send keyword as the `q` parameter
   if (filter.keyword) {
-    const lowerKeyword = filter.keyword.toLowerCase();
-    filteredItems = filteredItems.filter(
-      (item) =>
-        item.title.toLowerCase().includes(lowerKeyword) ||
-        item.content.toLowerCase().includes(lowerKeyword) ||
-        item.category.toLowerCase().includes(lowerKeyword),
-    );
+    params.q = filter.keyword;
   }
 
-  // Pagination
-  const total = filteredItems.length;
-  const startIndex = (page - 1) * pageSize;
-  const paginatedItems = filteredItems.slice(startIndex, startIndex + pageSize);
+  // Send type filter
+  if (filter.type) {
+    params.type = filter.type;
+  }
+
+  // Send tags as comma-separated string
+  if (filter.tags && filter.tags.length > 0) {
+    params.tags = filter.tags.join(",");
+  }
+
+  // Pass cursor for pagination (skip on first page)
+  if (cursor && page > 1) {
+    params.cursor = cursor;
+  }
+
+  // Call the backend search API
+  const apiContents = await apiGet<ApiContent[]>("/contents", { params });
+
+  // Map backend types to frontend types
+  const items = apiContents.map(mapApiContent);
+
+  // Determine if there are more results
+  // If the backend returned exactly `pageSize` items, there are likely more
+  const hasMore = apiContents.length >= pageSize;
 
   return {
-    items: paginatedItems,
-    total,
+    items,
+    total: items.length,
     page,
     pageSize,
-    hasMore: startIndex + pageSize < total,
+    hasMore,
   };
 }
 
 /**
- * Get a single content item by ID
+ * Get a single content item by ID (client-side search from loaded items)
+ * TODO: Add a dedicated backend endpoint GET /contents/:id when available
  */
 export async function getContentById(id: string): Promise<ContentItem | null> {
-  await delay(MOCK_DELAY);
-  return mockContentItems.find((item) => item.id === id) || null;
+  const response = await searchContent({}, 1, 100);
+  return response.items.find((item) => item.id === id) || null;
 }
 
 /**
  * Download content as a file
  */
 export function downloadContent(item: ContentItem): void {
+  if (!item.content) return;
+
   if (item.type === "text") {
     const blob = new Blob([item.content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -148,6 +164,8 @@ export function downloadContent(item: ContentItem): void {
  * For images, copies the actual image data so it can be pasted in apps like Facebook, Telegram, etc.
  */
 export async function copyToClipboard(item: ContentItem): Promise<boolean> {
+  if (!item.content) return false;
+
   try {
     if (item.type === "text") {
       await navigator.clipboard.writeText(item.content);
