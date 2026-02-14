@@ -7,7 +7,7 @@ import { useSearchHistoryStore } from '@/stores/search-history.store';
 const animatedTexts = [
   'Find the content you need',
   'Copy with a single click',
-  'Search by tags and type',
+  'Search by type',
   'Your personal content library',
 ];
 
@@ -78,8 +78,7 @@ export default function Index() {
           <div className="mt-6 text-sm text-muted-foreground">
             <p className="font-medium">Search tips:</p>
             <ul className="mt-2 space-y-1">
-              <li><code className="rounded bg-muted px-1.5 py-0.5">#tag</code> — Filter by tag</li>
-              <li><code className="rounded bg-muted px-1.5 py-0.5">@text</code> or <code className="rounded bg-muted px-1.5 py-0.5">@image</code> — Filter by content type</li>
+              <li><code className="rounded bg-muted px-1.5 py-0.5">@text</code> or <code className="rounded bg-muted px-1.5 py-0.5">@image</code> - Filter by content type</li>
               <li>Combine: <code className="rounded bg-muted px-1.5 py-0.5">fun #nature @image</code></li>
             </ul>
           </div>

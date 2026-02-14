@@ -18,7 +18,7 @@ export default function About() {
             
             <h2 className="text-xl font-semibold text-foreground">Features</h2>
             <ul className="list-inside list-disc space-y-2">
-              <li>Search content using keywords, tags, and type filters</li>
+              <li>Search content using keywords and type filters</li>
               <li>Copy any content to clipboard with a single click</li>
               <li>Download content for offline use</li>
               <li>Dark and light theme support</li>
@@ -27,7 +27,6 @@ export default function About() {
 
             <h2 className="text-xl font-semibold text-foreground">How to Search</h2>
             <ul className="list-inside list-disc space-y-2">
-              <li>Use <code className="rounded bg-muted px-1.5 py-0.5">#tag</code> to filter by tags</li>
               <li>Use <code className="rounded bg-muted px-1.5 py-0.5">@text</code> or <code className="rounded bg-muted px-1.5 py-0.5">@image</code> to filter by content type</li>
               <li>Combine filters: <code className="rounded bg-muted px-1.5 py-0.5">react #code @text</code></li>
             </ul>

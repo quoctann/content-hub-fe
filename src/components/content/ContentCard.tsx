@@ -1,7 +1,6 @@
 import { useState, useCallback, memo } from 'react';
 import { Copy, Download, ChevronDown, ChevronUp, Check, FileText, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import type { ContentItem } from '@/types/content';
 import { copyToClipboard, downloadContent } from '@/services/content.service';
@@ -46,13 +45,6 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-foreground leading-tight">{item.title}</h3>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {item.tags.map(tag => (
-                <Badge key={tag.id} variant="secondary" className="text-xs">
-                  #{tag.name}
-                </Badge>
-              ))}
-            </div>
           </div>
         </div>
         <Button variant="ghost" size="icon" onClick={toggleExpand} className="shrink-0">

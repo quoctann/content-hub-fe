@@ -14,7 +14,7 @@ interface SearchBarProps {
 
 export function SearchBar({
   onSearch,
-  placeholder = 'Search content... (use # for tags, @text or @image for type)',
+  placeholder = 'Search content... (use @text or @image for type)',
   initialValue = '',
   recentSearches = [],
   showRecentSearches = false,

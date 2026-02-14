@@ -5,7 +5,7 @@
  * Uses the centralized Axios API client for all HTTP requests.
  *
  * Backend API endpoints:
- * - GET  /contents?q=<query>&type=<type>&tags=<tags>&num=<count>&cursor=<id>  — Search contents
+ * - GET  /contents?q=<query>&type=<type>&num=<count>&cursor=<id>  — Search contents
  * - POST /contents                                      — Create content
  * - PUT  /contents/:id                                  — Update content
  *
@@ -27,22 +27,12 @@ const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * Parse search query string into structured filter
- * Supports: # for tags, @image/@text for type filtering
+ * Supports: @image/@text for type filtering
  */
 export function parseSearchQuery(query: string): SearchFilter {
-  const tags: string[] = [];
   const categories: string[] = [];
   let keyword = query;
   let type: ContentType | undefined;
-
-  // Extract tags (e.g., #fun, #beauty)
-  const tagMatches = query.match(/#(\w+)/g);
-  if (tagMatches) {
-    tagMatches.forEach((tag) => {
-      tags.push(tag.slice(1).toLowerCase());
-      keyword = keyword.replace(tag, "");
-    });
-  }
 
   // Extract type filter (e.g., @image, @text, @i, @t)
   const typeMatches = query.match(/@(image|text|i|t)\b/gi);
@@ -59,7 +49,6 @@ export function parseSearchQuery(query: string): SearchFilter {
 
   return {
     keyword: keyword || undefined,
-    tags: tags.length > 0 ? tags : undefined,
     categories: categories.length > 0 ? categories : undefined,
     type,
   };
@@ -97,11 +86,6 @@ export async function searchContent(
   // Send type filter
   if (filter.type) {
     params.type = filter.type;
-  }
-
-  // Send tags as comma-separated string
-  if (filter.tags && filter.tags.length > 0) {
-    params.tags = filter.tags.join(",");
   }
 
   // Pass cursor for pagination (skip on first page)
