@@ -40,8 +40,11 @@ export default function Index() {
         }, 30);
         return () => clearTimeout(timeout);
       } else {
-        setCurrentTextIndex((prev) => (prev + 1) % animatedTexts.length);
-        setIsTyping(true);
+        const timeout = setTimeout(() => {
+          setCurrentTextIndex((prev) => (prev + 1) % animatedTexts.length);
+          setIsTyping(true);
+        }, 100);
+        return () => clearTimeout(timeout);
       }
     }
   }, [displayText, isTyping, currentTextIndex]);
@@ -78,8 +81,9 @@ export default function Index() {
           <div className="mt-6 text-sm text-muted-foreground">
             <p className="font-medium">Search tips:</p>
             <ul className="mt-2 space-y-1">
-              <li><code className="rounded bg-muted px-1.5 py-0.5">@text</code> or <code className="rounded bg-muted px-1.5 py-0.5">@image</code> - Filter by content type</li>
-              <li>Combine: <code className="rounded bg-muted px-1.5 py-0.5">fun #nature @image</code></li>
+              <li><code className="rounded bg-muted px-1.5 py-0.5">@text</code> or <code className="rounded bg-muted px-1.5 py-0.5">@image</code> - Filter by single content type</li>
+              <li>Use <code className="rounded bg-muted px-1.5 py-0.5">,</code> to separate multiple keywords</li>
+              <li>Combine: <code className="rounded bg-muted px-1.5 py-0.5">fun, colorful, bright @image</code></li>
             </ul>
           </div>
         </div>

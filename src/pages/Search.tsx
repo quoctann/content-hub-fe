@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { SearchBar } from '@/components/search/SearchBar';
@@ -8,44 +8,30 @@ import { useSearchHistoryStore } from '@/stores/search-history.store';
 
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialQuery = searchParams.get('q') || '';
-  const initialType = searchParams.get('type');
   
-  const [currentQuery, setCurrentQuery] = useState(() => {
-    if (initialType) {
-      return `@${initialType} ${initialQuery}`.trim();
+  const currentQuery = useMemo(() => {
+    const queryFromUrl = searchParams.get('q') || '';
+    const typeFromUrl = searchParams.get('type');
+    if (typeFromUrl) {
+      return `@${typeFromUrl} ${queryFromUrl}`.trim();
     }
-    return initialQuery;
-  });
+    return queryFromUrl;
+  }, [searchParams]);
 
   const { items, isLoading, hasMore, total, search, loadMore } = useSearch();
   const recentSearches = useSearchHistoryStore((state) => state.recentSearches);
 
   // Perform initial search on mount or when query changes
   useEffect(() => {
-    const queryFromUrl = searchParams.get('q') || '';
-    const typeFromUrl = searchParams.get('type');
-    
-    let searchQuery = queryFromUrl;
-    if (typeFromUrl) {
-      searchQuery = `@${typeFromUrl} ${queryFromUrl}`.trim();
-    }
-
-    setCurrentQuery(searchQuery);
-    search(searchQuery);
-  }, [searchParams, search]);
+    search(currentQuery);
+  }, [searchParams, search, currentQuery]);
 
   const handleSearch = (query: string) => {
-    setCurrentQuery(query);
-    
-    // Update URL params
     if (query.trim()) {
       setSearchParams({ q: query });
     } else {
       setSearchParams({});
     }
-    
-    search(query);
   };
 
   return (

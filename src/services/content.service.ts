@@ -5,7 +5,7 @@
  * Uses the centralized Axios API client for all HTTP requests.
  *
  * Backend API endpoints:
- * - GET  /contents?q=<query>&type=<type>&num=<count>&cursor=<id>  — Search contents
+ * - GET  /contents?keywords=<query>&type=<type>&num=<count>&cursor=<id>  — Search contents
  * - POST /contents                                      — Create content
  * - PUT  /contents/:id                                  — Update content
  *
@@ -58,11 +58,11 @@ export function parseSearchQuery(query: string): SearchFilter {
  * Search content items using the backend API.
  *
  * The backend uses cursor-based pagination:
- * - `q`: search query text
+ * - `keywords`: comma-separated search keywords
  * - `num`: number of results to return
  * - `cursor`: the last item ID from the previous page (for loading more)
  *
- * @param filter - Parsed search filter (keyword is sent as `q` param)
+ * @param filter - Parsed search filter (keyword is sent as `keywords` param)
  * @param page - Page number (used to calculate if this is the first page)
  * @param pageSize - Number of results per page
  * @param cursor - Cursor for pagination (last item ID from previous results)
@@ -78,9 +78,9 @@ export async function searchContent(
     num: pageSize,
   };
 
-  // Send keyword as the `q` parameter
+  // Send keyword as the `keywords` parameter
   if (filter.keyword) {
-    params.q = filter.keyword;
+    params.keywords = filter.keyword;
   }
 
   // Send type filter

@@ -12,8 +12,9 @@ export interface ContentItem {
   id: string;
   type: ContentType;
   title: string;
-  content: string; // For text: the actual text content. For image: the image URL
+  content: string;
   category: string;
+  tags?: { id: string; name: string }[];
   createdAt: Date;
   updatedAt: Date;
 }

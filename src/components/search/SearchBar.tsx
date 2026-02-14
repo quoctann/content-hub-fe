@@ -1,4 +1,4 @@
-import { useState, useCallback, type FormEvent, type KeyboardEvent } from 'react';
+import { useState, useCallback, type FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -27,12 +27,6 @@ export function SearchBar({
     onSearch(query);
   }, [query, onSearch]);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      onSearch(query);
-    }
-  }, [query, onSearch]);
-
   const handleRecentClick = useCallback((searchQuery: string) => {
     setQuery(searchQuery);
     onSearch(searchQuery);
@@ -50,7 +44,6 @@ export function SearchBar({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 150)}
             placeholder={placeholder}

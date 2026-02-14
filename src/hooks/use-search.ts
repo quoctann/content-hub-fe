@@ -10,7 +10,7 @@
  * the cursor to get the next batch.
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { ContentItem, SearchFilter } from "@/types/content";
 import { searchContent, parseSearchQuery } from "@/services/content.service";
 import { useSearchHistoryStore } from "@/stores/search-history.store";
@@ -34,12 +34,17 @@ export function useSearch(initialQuery?: string): UseSearchResult {
   const [currentFilter, setCurrentFilter] = useState<SearchFilter>({});
 
   const addSearch = useSearchHistoryStore((state) => state.addSearch);
+  const initialQueryRef = useRef(initialQuery);
 
   // Execute initial query if provided
+  // Intentionally not including 'search' in deps to avoid infinite loop
+  // since 'search' depends on 'addSearch' which changes frequently
   useEffect(() => {
-    if (initialQuery) {
-      search(initialQuery);
+    if (initialQueryRef.current) {
+      search(initialQueryRef.current);
+      initialQueryRef.current = undefined;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]);
 
   const search = useCallback(
