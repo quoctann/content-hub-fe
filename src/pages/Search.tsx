@@ -46,7 +46,7 @@ export default function Search() {
           />
           {total > 0 && !isLoading && (
             <p className="mt-4 text-sm text-muted-foreground">
-              Found {total} result{total !== 1 ? 's' : ''}
+              tìm thấy {total} kết quả{total !== 1 ? 's' : ''}
             </p>
           )}
         </div>

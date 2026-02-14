@@ -18,16 +18,16 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
     const success = await copyToClipboard(item);
     if (success) {
       setIsCopied(true);
-      toast.success('Copied to clipboard!');
+      toast.success('đã sao chép vào bộ nhớ tạm');
       setTimeout(() => setIsCopied(false), 2000);
     } else {
-      toast.error('Failed to copy');
+      toast.error('lỗi cmnr!');
     }
   }, [item]);
 
   const handleDownload = useCallback(() => {
     downloadContent(item);
-    toast.success('Download started');
+    toast.success('đã tải về');
   }, [item]);
 
   const toggleExpand = useCallback(() => {
@@ -81,18 +81,18 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
         <div className="mt-4 flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={handleDownload}>
             <Download className="mr-1.5 h-3.5 w-3.5" />
-            Download
+            tải xuống
           </Button>
           <Button variant="outline" size="sm" onClick={handleCopy}>
             {isCopied ? (
               <>
                 <Check className="mr-1.5 h-3.5 w-3.5" />
-                Copied!
+                copied!
               </>
             ) : (
               <>
                 <Copy className="mr-1.5 h-3.5 w-3.5" />
-                Copy
+                copy
               </>
             )}
           </Button>

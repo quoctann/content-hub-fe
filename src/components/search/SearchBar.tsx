@@ -14,7 +14,7 @@ interface SearchBarProps {
 
 export function SearchBar({
   onSearch,
-  placeholder = 'Search content... (use @text or @image for type)',
+  placeholder = 'tìm ít chữ thôi...',
   initialValue = '',
   recentSearches = [],
   showRecentSearches = false,
@@ -50,12 +50,12 @@ export function SearchBar({
             className="pl-10"
           />
         </div>
-        <Button type="submit">Search</Button>
+        <Button type="submit">tìm</Button>
       </form>
 
       {showDropdown && (
         <div className="absolute left-0 right-0 top-full z-10 mt-2 rounded-lg border border-border bg-popover p-2 shadow-lg">
-          <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Recent Searches</p>
+          <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Gần đây</p>
           {recentSearches.map(search => (
             <button
               key={search.id}

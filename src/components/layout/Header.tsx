@@ -4,25 +4,26 @@ import { Menu, Moon, Sun, FileText, Image, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useTheme } from '@/hooks/use-theme';
+import traime from '@/assets/traime.png';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const menuItems = [
-    { label: 'Text Content', href: '/search?type=text', icon: FileText },
-    { label: 'Image Content', href: '/search?type=image', icon: Image },
-    { label: 'About', href: '/about', icon: Info },
+    { label: 'văn mẫu', href: '/search?type=text', icon: FileText },
+    { label: 'hình ảnh', href: '/search?type=image', icon: Image },
+    { label: 'giới thiệu', href: '/about', icon: Info },
   ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">CH</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg">
+            <img src={traime} alt="Logo" />
           </div>
-          <span className="text-lg font-semibold text-foreground">Content Hub</span>
+          <span className="text-lg font-semibold text-foreground">me me</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
@@ -69,12 +70,12 @@ export function Header() {
                   {theme === 'light' ? (
                     <>
                       <Moon className="h-5 w-5" />
-                      Dark Theme
+                      dảk theme
                     </>
                   ) : (
                     <>
                       <Sun className="h-5 w-5" />
-                      Light Theme
+                      light theme
                     </>
                   )}
                 </Button>

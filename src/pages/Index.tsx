@@ -5,10 +5,12 @@ import { SearchBar } from '@/components/search/SearchBar';
 import { useSearchHistoryStore } from '@/stores/search-history.store';
 
 const animatedTexts = [
-  'Find the content you need',
-  'Copy with a single click',
-  'Search by type',
-  'Your personal content library',
+  'muối chấm me',
+  'break the ice',
+  'hề mạng',
+  'me me hay mim',
+  'bún đậu chấm sữa ông thọ',
+  'đùa không vui, tôi đã căng',
 ];
 
 export default function Index() {
@@ -60,10 +62,9 @@ export default function Index() {
   return (
     <Layout>
       <section className="container flex flex-col items-center justify-center py-20 md:py-32">
-{/* <section className="mx-auto max-w-7xl px-4 flex flex-col items-center justify-center py-20 md:py-32"> */}
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
-            Content Hub
+            meme <span className="text-muted-foreground">(n)</span> <span className="italic">/miːm/</span>
           </h1>
           <p className="mt-4 h-8 text-xl text-muted-foreground md:text-2xl">
             {displayText}
@@ -79,11 +80,11 @@ export default function Index() {
           </div>
 
           <div className="mt-6 text-sm text-muted-foreground">
-            <p className="font-medium">Search tips:</p>
+            <p className="font-medium">mẹo:</p>
             <ul className="mt-2 space-y-1">
-              <li><code className="rounded bg-muted px-1.5 py-0.5">@text</code> or <code className="rounded bg-muted px-1.5 py-0.5">@image</code> - Filter by single content type</li>
-              <li>Use <code className="rounded bg-muted px-1.5 py-0.5">,</code> to separate multiple keywords</li>
-              <li>Combine: <code className="rounded bg-muted px-1.5 py-0.5">fun, colorful, bright @image</code></li>
+              <li><code className="rounded bg-muted px-1.5 py-0.5">@text</code> hoặc <code className="rounded bg-muted px-1.5 py-0.5">@image</code> - lọc content ảnh hoặc văn bản</li>
+              <li>xài dấu phẩy <code className="rounded bg-muted px-1.5 py-0.5">,</code> để tìm chi tiết hơn</li>
+              <li>dí dụ: <code className="rounded bg-muted px-1.5 py-0.5">gai, dep @image</code></li>
             </ul>
           </div>
         </div>
