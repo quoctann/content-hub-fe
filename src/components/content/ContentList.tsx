@@ -39,8 +39,8 @@ export function ContentList({ items, isLoading, hasMore, onLoadMore }: ContentLi
   if (items.length === 0 && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <p className="text-lg text-muted-foreground">No content found</p>
-        <p className="mt-2 text-sm text-muted-foreground">Try adjusting your search query</p>
+        <p className="text-lg text-muted-foreground">ko tìm thấy gì</p>
+        <p className="mt-2 text-sm text-muted-foreground">thử tìm cái khác coi</p>
       </div>
     );
   }
@@ -54,14 +54,14 @@ export function ContentList({ items, isLoading, hasMore, onLoadMore }: ContentLi
       {isLoading && (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-sm text-muted-foreground">Loading...</span>
+          <span className="ml-2 text-sm text-muted-foreground">đang tải...</span>
         </div>
       )}
 
       {hasMore && !isLoading && (
         <div className="flex justify-center py-4">
           <Button variant="outline" onClick={onLoadMore}>
-            Load More
+            tải thêm
           </Button>
         </div>
       )}

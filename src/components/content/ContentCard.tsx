@@ -1,7 +1,6 @@
 import { useState, useCallback, memo } from 'react';
 import { Copy, Download, ChevronDown, ChevronUp, Check, FileText, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import type { ContentItem } from '@/types/content';
 import { copyToClipboard, downloadContent } from '@/services/content.service';
@@ -19,16 +18,16 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
     const success = await copyToClipboard(item);
     if (success) {
       setIsCopied(true);
-      toast.success('Copied to clipboard!');
+      toast.success('đã sao chép vào bộ nhớ tạm');
       setTimeout(() => setIsCopied(false), 2000);
     } else {
-      toast.error('Failed to copy');
+      toast.error('lỗi cmnr!');
     }
   }, [item]);
 
   const handleDownload = useCallback(() => {
     downloadContent(item);
-    toast.success('Download started');
+    toast.success('đã tải về');
   }, [item]);
 
   const toggleExpand = useCallback(() => {
@@ -46,13 +45,6 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-foreground leading-tight">{item.title}</h3>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {item.tags.map(tag => (
-                <Badge key={tag.id} variant="secondary" className="text-xs">
-                  #{tag.name}
-                </Badge>
-              ))}
-            </div>
           </div>
         </div>
         <Button variant="ghost" size="icon" onClick={toggleExpand} className="shrink-0">
@@ -71,30 +63,36 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
           </p>
         ) : (
           <div className={`overflow-hidden rounded-lg ${isExpanded ? 'max-h-96' : 'max-h-32'}`}>
-            <img
-              src={item.content}
-              alt={item.title}
-              className="h-full w-full object-cover transition-all"
-              loading="lazy"
-            />
+            {item.content ? (
+              <img
+                src={item.content}
+                alt={item.title}
+                className="h-full w-full object-cover transition-all"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-32 w-full items-center justify-center bg-muted">
+                <Image className="h-10 w-10 text-muted-foreground/50" />
+              </div>
+            )}
           </div>
         )}
 
         <div className="mt-4 flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={handleDownload}>
             <Download className="mr-1.5 h-3.5 w-3.5" />
-            Download
+            tải xuống
           </Button>
           <Button variant="outline" size="sm" onClick={handleCopy}>
             {isCopied ? (
               <>
                 <Check className="mr-1.5 h-3.5 w-3.5" />
-                Copied!
+                copied!
               </>
             ) : (
               <>
                 <Copy className="mr-1.5 h-3.5 w-3.5" />
-                Copy
+                copy
               </>
             )}
           </Button>

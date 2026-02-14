@@ -6,37 +6,44 @@ export default function About() {
       <div className="container py-16">
         <div className="mx-auto max-w-2xl">
           <h1 className="text-3xl font-bold text-foreground md:text-4xl">
-            About Content Hub
+            web gì vậy?
           </h1>
-          
           <div className="mt-8 space-y-6 text-muted-foreground">
             <p>
-              Content Hub is your personal content library designed to help you find, 
-              organize, and quickly copy the content you need. Whether it's text snippets, 
-              code examples, or images, everything is just a search away.
+              đây là web giúp bạn trở thành hề mạng với tuyển tập những văn mẫu 
+              nhảm nhí, meme vô bổ, nói chung là chẳng có giá trị gì cả nhưng mà vui
             </p>
             
-            <h2 className="text-xl font-semibold text-foreground">Features</h2>
+            <h2 className="text-xl font-semibold text-foreground">tính năng</h2>
             <ul className="list-inside list-disc space-y-2">
-              <li>Search content using keywords, tags, and type filters</li>
-              <li>Copy any content to clipboard with a single click</li>
-              <li>Download content for offline use</li>
-              <li>Dark and light theme support</li>
-              <li>Recent search history for quick access</li>
+              <li>tìm kiếm theo keywords, chính xác thì hên xui nhưng méo mó có còn hơn không</li>
+              <li>copy và paste vào box chat, tránh ngắt quãng tiếng cười</li>
             </ul>
 
-            <h2 className="text-xl font-semibold text-foreground">How to Search</h2>
+            <h2 className="text-xl font-semibold text-foreground">xài sao?</h2>
             <ul className="list-inside list-disc space-y-2">
-              <li>Use <code className="rounded bg-muted px-1.5 py-0.5">#tag</code> to filter by tags</li>
-              <li>Use <code className="rounded bg-muted px-1.5 py-0.5">@text</code> or <code className="rounded bg-muted px-1.5 py-0.5">@image</code> to filter by content type</li>
-              <li>Combine filters: <code className="rounded bg-muted px-1.5 py-0.5">react #code @text</code></li>
+              <li>sử dụng <code className="rounded bg-muted px-1.5 py-0.5">@text</code> hoặc <code className="rounded bg-muted px-1.5 py-0.5">@image</code> để lọc nội dung là hình ảnh hoặc văn bản</li>
+              <li>kết hợp: <code className="rounded bg-muted px-1.5 py-0.5">gai, dep @text</code> - tất nhiên sẽ không có kết quả, web mêm chứ không phải web ⚡</li>
             </ul>
 
-            <h2 className="text-xl font-semibold text-foreground">Contact</h2>
+            <h2 className="text-xl font-semibold text-foreground">disclaimer</h2>
             <p>
-              Have questions or feedback? Reach out to us at{' '}
-              <a href="mailto:contact@example.com" className="text-foreground underline hover:no-underline">
-                contact@example.com
+              nội dung được thu thập từ các nguồn công khai trên mạng xã hội, 
+              nếu nó vô tình trùng khớp với các sự kiện, nhân vật hoặc hiện 
+              tượng thực tế, điều đó hoàn toàn ngẫu nhiên và không có chủ đích
+            </p>
+            <p>
+              nội dung có thể chứa thông tin không phù hợp với mọi đối tượng,
+              vì vậy hãy cân nhắc trước khi sử dụng, nếu có nội dung quá phản 
+              cảm xin hãy liên hệ để mình gỡ bỏ
+            </p>
+            <p>
+              nếu bạn là chủ sở hữu của một nội dung nào đó và không muốn nó
+              xuất hiện ở đây, hãy liên hệ với mình để được gỡ bỏ
+            </p>
+            <p>
+              <a href="mailto:contact.tantranquoc@gmail.com" className="text-foreground underline hover:no-underline">
+                contact.tantranquoc@gmail.com
               </a>
             </p>
           </div>

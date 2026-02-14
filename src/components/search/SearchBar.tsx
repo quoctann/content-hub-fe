@@ -1,4 +1,4 @@
-import { useState, useCallback, type FormEvent, type KeyboardEvent } from 'react';
+import { useState, useCallback, type FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ interface SearchBarProps {
 
 export function SearchBar({
   onSearch,
-  placeholder = 'Search content... (use # for tags, @text or @image for type)',
+  placeholder = 'tìm ít chữ thôi...',
   initialValue = '',
   recentSearches = [],
   showRecentSearches = false,
@@ -25,12 +25,6 @@ export function SearchBar({
   const handleSubmit = useCallback((e: FormEvent) => {
     e.preventDefault();
     onSearch(query);
-  }, [query, onSearch]);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      onSearch(query);
-    }
   }, [query, onSearch]);
 
   const handleRecentClick = useCallback((searchQuery: string) => {
@@ -50,19 +44,18 @@ export function SearchBar({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 150)}
             placeholder={placeholder}
             className="pl-10"
           />
         </div>
-        <Button type="submit">Search</Button>
+        <Button type="submit">tìm</Button>
       </form>
 
       {showDropdown && (
         <div className="absolute left-0 right-0 top-full z-10 mt-2 rounded-lg border border-border bg-popover p-2 shadow-lg">
-          <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Recent Searches</p>
+          <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Gần đây</p>
           {recentSearches.map(search => (
             <button
               key={search.id}
