@@ -53,7 +53,8 @@ export interface RecentSearch {
 export interface ApiContent {
   id: number;
   title: string;
-  search_data: string;
+  // Backend returns `text_data` for text content (nullable)
+  text_data?: string | null;
   link: string;
   type: ContentType;
   created_at: string;
@@ -79,7 +80,7 @@ export function mapApiContent(apiContent: ApiContent): ContentItem {
     type: apiContent.type,
     title: apiContent.title,
     content:
-      apiContent.type === "image" ? apiContent.link : apiContent.search_data,
+        apiContent.type === "image" ? apiContent.link : (apiContent.text_data ?? ''),
     category: "", // Backend does not have category field
     createdAt: new Date(apiContent.created_at),
     updatedAt: new Date(apiContent.updated_at),

@@ -11,7 +11,8 @@ interface ContentCardProps {
 }
 
 export const ContentCard = memo(function ContentCard({ item }: ContentCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  // Default expanded for images, collapsed for text items
+  const [isExpanded, setIsExpanded] = useState(item.type === 'image');
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -33,6 +34,7 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
   const toggleExpand = useCallback(() => {
     setIsExpanded(prev => !prev);
   }, []);
+
 
   const TypeIcon = item.type === 'text' ? FileText : Image;
 
@@ -62,12 +64,12 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
             {item.content}
           </p>
         ) : (
-          <div className={`overflow-hidden rounded-lg ${isExpanded ? 'max-h-96' : 'max-h-32'}`}>
+          <div className={`overflow-auto rounded-lg bg-muted ${isExpanded ? 'max-h-screen' : 'max-h-48'}`}>
             {item.content ? (
               <img
                 src={item.content}
                 alt={item.title}
-                className="h-full w-full object-cover transition-all"
+                className="w-full h-auto object-contain transition-all"
                 loading="lazy"
               />
             ) : (
