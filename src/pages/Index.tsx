@@ -82,9 +82,9 @@ export default function Index() {
           <div className="mt-6 text-sm text-muted-foreground">
             <p className="font-medium">mẹo:</p>
             <ul className="mt-2 space-y-1">
-              <li><code className="rounded bg-muted px-1.5 py-0.5">@text</code> hoặc <code className="rounded bg-muted px-1.5 py-0.5">@image</code> - lọc content ảnh hoặc văn bản</li>
+              <li><code className="rounded bg-muted px-1.5 py-0.5">@text</code> hoặc <code className="rounded bg-muted px-1.5 py-0.5">@image</code> - lọc nội dung ảnh hoặc văn bản</li>
               <li>xài dấu phẩy <code className="rounded bg-muted px-1.5 py-0.5">,</code> để tìm chi tiết hơn</li>
-              <li>dí dụ: <code className="rounded bg-muted px-1.5 py-0.5">gai, dep @image</code></li>
+              <li>dí dụ: <code className="rounded bg-muted px-1.5 py-0.5">banh, mi @image</code></li>
             </ul>
           </div>
         </div>

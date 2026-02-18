@@ -6,12 +6,12 @@ export default function About() {
       <div className="container py-16">
         <div className="mx-auto max-w-2xl">
           <h1 className="text-3xl font-bold text-foreground md:text-4xl">
-            web gì vậy?
+            giới thịu
           </h1>
           <div className="mt-8 space-y-6 text-muted-foreground">
             <p>
               đây là web giúp bạn trở thành hề mạng với tuyển tập những văn mẫu 
-              nhảm nhí, meme vô bổ, nói chung là chẳng có giá trị gì cả nhưng mà vui
+              nhảm nhí, meme vô bổ, nói chung là chẳng có giá trị gì cả
             </p>
             
             <h2 className="text-xl font-semibold text-foreground">tính năng</h2>
@@ -23,7 +23,7 @@ export default function About() {
             <h2 className="text-xl font-semibold text-foreground">xài sao?</h2>
             <ul className="list-inside list-disc space-y-2">
               <li>sử dụng <code className="rounded bg-muted px-1.5 py-0.5">@text</code> hoặc <code className="rounded bg-muted px-1.5 py-0.5">@image</code> để lọc nội dung là hình ảnh hoặc văn bản</li>
-              <li>kết hợp: <code className="rounded bg-muted px-1.5 py-0.5">gai, dep @text</code> - tất nhiên sẽ không có kết quả, web mêm chứ không phải web ⚡</li>
+              <li>kết hợp: <code className="rounded bg-muted px-1.5 py-0.5">banh, mi @text</code></li>
             </ul>
 
             <h2 className="text-xl font-semibold text-foreground">disclaimer</h2>
