@@ -13,7 +13,7 @@
  */
 
 import type {
-  ApiContent,
+  ApiSearchResponse,
   ContentItem,
   ContentType,
   SearchFilter,
@@ -60,12 +60,14 @@ export function parseSearchQuery(query: string): SearchFilter {
  * The backend uses cursor-based pagination:
  * - `keywords`: comma-separated search keywords
  * - `num`: number of results to return
- * - `cursor`: the last item ID from the previous page (for loading more)
+ * - `cursor`: the offset for pagination (starting position)
+ *
+ * Returns pagination metadata including totalCount and hasMore in the response.
  *
  * @param filter - Parsed search filter (keyword is sent as `keywords` param)
  * @param page - Page number (used to calculate if this is the first page)
  * @param pageSize - Number of results per page
- * @param cursor - Cursor for pagination (last item ID from previous results)
+ * @param cursor - Cursor for pagination (offset for next page)
  */
 export async function searchContent(
   filter: SearchFilter,
@@ -93,22 +95,22 @@ export async function searchContent(
     params.cursor = cursor;
   }
 
-  // Call the backend search API
-  const apiContents = await apiGet<ApiContent[]>("/contents", { params });
+  // Call the backend search API - now returns wrapped response with pagination
+  const response = await apiGet<ApiSearchResponse>("/contents", { params });
 
   // Map backend types to frontend types
-  const items = apiContents.map(mapApiContent);
+  const items = response.items.map(mapApiContent);
 
-  // Determine if there are more results
-  // If the backend returned exactly `pageSize` items, there are likely more
-  const hasMore = apiContents.length >= pageSize;
+  // Use actual pagination metadata from backend
+  const { total_count, page_size, has_more, next_cursor } = response.pagination;
 
   return {
     items,
-    total: items.length,
+    total: total_count,
     page,
-    pageSize,
-    hasMore,
+    pageSize: page_size,
+    hasMore: has_more,
+    nextCursor: next_cursor || undefined,
   };
 }
 

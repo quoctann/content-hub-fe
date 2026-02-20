@@ -15,7 +15,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { RecentSearch } from "@/types/content";
 
-const MAX_RECENT_SEARCHES = 10;
+const MAX_RECENT_SEARCHES = 3;
 
 interface SearchHistoryState {
   /** LIFO list of recent searches (newest first) */

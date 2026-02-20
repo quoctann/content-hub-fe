@@ -1,6 +1,7 @@
 import { useState, useCallback, memo } from 'react';
 import { Copy, Download, ChevronDown, ChevronUp, Check, FileText, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import type { ContentItem } from '@/types/content';
 import { copyToClipboard, downloadContent } from '@/services/content.service';
@@ -46,7 +47,14 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
             <TypeIcon className="h-5 w-5 text-accent-foreground" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-foreground leading-tight">{item.title}</h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-semibold text-foreground leading-tight">{item.title}</h3>
+              {item.rank && item.rank > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  độ liên quan: {(item.rank * 100).toFixed(2)}%
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
         <Button variant="ghost" size="icon" onClick={toggleExpand} className="shrink-0">
@@ -60,7 +68,7 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
 
       <CardContent>
         {item.type === 'text' ? (
-          <p className={`text-sm text-muted-foreground ${isExpanded ? '' : 'line-clamp-2'}`}>
+          <p className={`text-sm text-muted-foreground whitespace-pre-wrap ${isExpanded ? '' : 'line-clamp-2'}`}>
             {item.content}
           </p>
         ) : (

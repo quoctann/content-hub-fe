@@ -5,9 +5,9 @@
  * Uses Zustand store for recent search history.
  *
  * Pagination strategy:
- * The backend uses cursor-based pagination where the cursor is the last
- * item's ID. When loading more results, we pass the last item's ID as
- * the cursor to get the next batch.
+ * The backend uses offset-based pagination where the cursor is the next
+ * offset value provided in the pagination metadata. When loading more results,
+ * we pass the next_cursor from the previous response.
  */
 
 import { useState, useCallback, useEffect, useRef } from "react";
@@ -32,6 +32,7 @@ export function useSearch(initialQuery?: string): UseSearchResult {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [currentFilter, setCurrentFilter] = useState<SearchFilter>({});
+  const [nextCursor, setNextCursor] = useState<string | undefined>();
 
   const addSearch = useSearchHistoryStore((state) => state.addSearch);
   const initialQueryRef = useRef(initialQuery);
@@ -60,6 +61,7 @@ export function useSearch(initialQuery?: string): UseSearchResult {
         setItems(response.items);
         setHasMore(response.hasMore);
         setTotal(response.total);
+        setNextCursor(response.nextCursor || undefined);
 
         // Add to recent searches if query is not empty
         if (query.trim()) {
@@ -70,6 +72,7 @@ export function useSearch(initialQuery?: string): UseSearchResult {
         setItems([]);
         setHasMore(false);
         setTotal(0);
+        setNextCursor(undefined);
       } finally {
         setIsLoading(false);
       }
@@ -78,31 +81,28 @@ export function useSearch(initialQuery?: string): UseSearchResult {
   );
 
   const loadMore = useCallback(async () => {
-    if (isLoading || !hasMore) return;
+    if (isLoading || !hasMore || !nextCursor) return;
 
     setIsLoading(true);
     const nextPage = page + 1;
-
-    // Get cursor from the last loaded item (cursor-based pagination)
-    const lastItem = items[items.length - 1];
-    const cursor = lastItem?.id;
 
     try {
       const response = await searchContent(
         currentFilter,
         nextPage,
         10,
-        cursor,
+        nextCursor,
       );
       setItems((prev) => [...prev, ...response.items]);
       setHasMore(response.hasMore);
       setPage(nextPage);
+      setNextCursor(response.nextCursor || undefined);
     } catch (error) {
       console.error("Load more failed:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, hasMore, page, currentFilter, items]);
+  }, [isLoading, hasMore, nextCursor, page, currentFilter]);
 
   const reset = useCallback(() => {
     setItems([]);
@@ -111,6 +111,7 @@ export function useSearch(initialQuery?: string): UseSearchResult {
     setTotal(0);
     setPage(1);
     setCurrentFilter({});
+    setNextCursor(undefined);
   }, []);
 
   return {

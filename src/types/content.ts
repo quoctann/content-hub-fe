@@ -14,6 +14,7 @@ export interface ContentItem {
   title: string;
   content: string;
   category: string;
+  rank?: number; // Search relevance rank (optional, only present in search results)
   tags?: { id: string; name: string }[];
   createdAt: Date;
   updatedAt: Date;
@@ -36,6 +37,7 @@ export interface SearchResponse {
   page: number;
   pageSize: number;
   hasMore: boolean;
+  nextCursor?: string; // Next cursor for pagination (undefined if no more results)
 }
 
 export interface RecentSearch {
@@ -49,6 +51,15 @@ export interface RecentSearch {
 // These mirror the JSON shape returned by the Content Hub backend.
 // =============================================================================
 
+/** Matches `domain.PaginationMeta` from the backend */
+export interface PaginationMeta {
+  total_count: number;
+  page_size: number;
+  cursor: string;
+  next_cursor: string;
+  has_more: boolean;
+}
+
 /** Matches `domain.Content` from the backend */
 export interface ApiContent {
   id: number;
@@ -57,8 +68,15 @@ export interface ApiContent {
   text_data?: string | null;
   link: string;
   type: ContentType;
+  rank: number; // Relevance rank from full-text search (0 if not searching)
   created_at: string;
   updated_at: string;
+}
+
+/** Matches `ContentSearchResponseWrapper` from the backend */
+export interface ApiSearchResponse {
+  items: ApiContent[];
+  pagination: PaginationMeta;
 }
 
 // =============================================================================
@@ -72,6 +90,7 @@ export interface ApiContent {
  * - `id`: number → string
  * - `text` / `url` → single `content` field (text types use `text`, image types use `url`)
  * - `category`: not present in backend, defaults to empty string
+ * - `rank`: search relevance rank (0 means not from search)
  * - Dates: ISO string → Date object
  */
 export function mapApiContent(apiContent: ApiContent): ContentItem {
@@ -82,6 +101,7 @@ export function mapApiContent(apiContent: ApiContent): ContentItem {
     content:
         apiContent.type === "image" ? apiContent.link : (apiContent.text_data ?? ''),
     category: "", // Backend does not have category field
+    rank: apiContent.rank || undefined, // Only include if rank > 0
     createdAt: new Date(apiContent.created_at),
     updatedAt: new Date(apiContent.updated_at),
   };

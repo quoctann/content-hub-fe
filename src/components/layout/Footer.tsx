@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="mt-auto border-t border-border bg-muted/50">
       <div className="container flex flex-col items-center gap-4 py-8 md:flex-row md:justify-between">
         <p className="text-sm text-muted-foreground">
-          made with 💔 2026
+          made with ☕ 2026
         </p>
         <nav className="flex items-center gap-4">
           <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground">
@@ -16,7 +16,15 @@ export function Footer() {
             href="mailto:contact.tantranquoc@gmail.com" 
             className="text-sm text-muted-foreground hover:text-foreground"
           >
-            liên hệ
+            email
+          </a>
+          <span className="text-muted-foreground">•</span>
+          <a 
+            href="https://m.me/quctan"
+            target="_blank"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            messenger
           </a>
         </nav>
       </div>

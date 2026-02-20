@@ -1,7 +1,11 @@
 import { useState, useCallback, type FormEvent } from 'react';
-import { Search } from 'lucide-react';
+import { Search, List, Grid3x3, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useViewPreferenceStore } from '@/stores/view-preference.store';
+import { useSearchHistoryStore } from '@/stores/search-history.store';
 import type { RecentSearch } from '@/types/content';
 
 interface SearchBarProps {
@@ -21,6 +25,10 @@ export function SearchBar({
 }: SearchBarProps) {
   const [query, setQuery] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
+  const isMobile = useIsMobile();
+  const viewMode = useViewPreferenceStore((state) => state.viewMode);
+  const setViewMode = useViewPreferenceStore((state) => state.setViewMode);
+  const clearSearches = useSearchHistoryStore((state) => state.clearSearches);
 
   const handleSubmit = useCallback((e: FormEvent) => {
     e.preventDefault();
@@ -32,6 +40,15 @@ export function SearchBar({
     onSearch(searchQuery);
     setIsFocused(false);
   }, [onSearch]);
+
+  const toggleViewMode = useCallback(() => {
+    setViewMode(viewMode === 'list' ? 'grid' : 'list');
+  }, [viewMode, setViewMode]);
+
+  const handleClearSearches = useCallback(() => {
+    clearSearches();
+    setIsFocused(false);
+  }, [clearSearches]);
 
   const showDropdown = showRecentSearches && isFocused && recentSearches.length > 0 && !query;
 
@@ -51,6 +68,30 @@ export function SearchBar({
           />
         </div>
         <Button type="submit">tìm</Button>
+        {!isMobile && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={toggleViewMode}
+                  aria-label={viewMode === 'list' ? 'Switch to grid view' : 'Switch to list view'}
+                >
+                  {viewMode === 'list' ? (
+                    <Grid3x3 className="h-4 w-4" />
+                  ) : (
+                    <List className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {viewMode === 'list' ? 'Switch to grid view' : 'Switch to list view'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </form>
 
       {showDropdown && (
@@ -65,6 +106,13 @@ export function SearchBar({
               {search.query}
             </button>
           ))}
+          <button
+            onClick={handleClearSearches}
+            className="mt-2 flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4" />
+            xóa lịch sử tìm kiếm
+          </button>
         </div>
       )}
     </div>

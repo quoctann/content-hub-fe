@@ -6,7 +6,7 @@ export default function About() {
       <div className="container py-16">
         <div className="mx-auto max-w-2xl">
           <h1 className="text-3xl font-bold text-foreground md:text-4xl">
-            giới thịu
+            giới thiệu
           </h1>
           <div className="mt-8 space-y-6 text-muted-foreground">
             <p>
@@ -16,7 +16,7 @@ export default function About() {
             
             <h2 className="text-xl font-semibold text-foreground">tính năng</h2>
             <ul className="list-inside list-disc space-y-2">
-              <li>tìm kiếm theo keywords, chính xác thì hên xui nhưng méo mó có còn hơn không</li>
+              <li>tìm kiếm theo keywords, chính xác thì hên xui, méo mó có còn hơn không</li>
               <li>copy và paste vào box chat, tránh ngắt quãng tiếng cười</li>
             </ul>
 
@@ -40,11 +40,6 @@ export default function About() {
             <p>
               nếu bạn là chủ sở hữu của một nội dung nào đó và không muốn nó
               xuất hiện ở đây, hãy liên hệ với mình để được gỡ bỏ
-            </p>
-            <p>
-              <a href="mailto:contact.tantranquoc@gmail.com" className="text-foreground underline hover:no-underline">
-                contact.tantranquoc@gmail.com
-              </a>
             </p>
           </div>
         </div>

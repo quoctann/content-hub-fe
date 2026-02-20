@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { ArrowUp, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useViewPreferenceStore } from '@/stores/view-preference.store';
 import { ContentCard } from './ContentCard';
 import type { ContentItem } from '@/types/content';
 
@@ -13,6 +14,7 @@ interface ContentListProps {
 
 export function ContentList({ items, isLoading, hasMore, onLoadMore }: ContentListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const viewMode = useViewPreferenceStore((state) => state.viewMode);
 
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -46,7 +48,10 @@ export function ContentList({ items, isLoading, hasMore, onLoadMore }: ContentLi
   }
 
   return (
-    <div ref={containerRef} className="space-y-4">
+    <div
+      ref={containerRef}
+      className={viewMode === 'list' ? 'space-y-4' : 'grid md:grid-cols-2 xl:grid-cols-3 gap-4'}
+    >
       {items.map(item => (
         <ContentCard key={item.id} item={item} />
       ))}
