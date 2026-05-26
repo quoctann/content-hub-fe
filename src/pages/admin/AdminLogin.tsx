@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const setTokens = useAuthStore((s) => s.setTokens);
+  const setAuth = useAuthStore((s) => s.setAuth);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +17,7 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       const res = await adminLogin({ username, password });
-      setTokens(res.access_token, res.refresh_token, res.expires_in);
+      setAuth(res.csrf_token, res.expires_in);
       navigate('/admin/dashboard', { replace: true });
     } catch {
       setError('Invalid username or password.');

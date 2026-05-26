@@ -1,50 +1,62 @@
 /**
  * Auth Store (Zustand)
  *
- * Manages JWT token state for the admin dashboard.
- * Persists tokens to localStorage so the session survives page refreshes.
+ * Manages auth state for the admin dashboard.
+ * Tokens are stored in HttpOnly cookies (set by the backend).
+ * This store only tracks: csrfToken (for request headers), expiresAt, and isAuthenticated.
  */
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface AuthState {
-  token: string | null;
-  refreshToken: string | null;
-  expiresIn: number | null;
-  /** True if a valid token is present */
+  csrfToken: string | null;
+  expiresAt: number | null;
   isAuthenticated: boolean;
-  /** Store JWT tokens after a successful login */
-  setTokens: (token: string, refreshToken: string, expiresIn: number) => void;
-  /** Clear all auth state (logout) */
+  setAuth: (csrfToken: string, expiresIn: number) => void;
+  updateAccessToken: (csrfToken: string, expiresIn: number) => void;
   logout: () => void;
+  isTokenExpired: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
-      token: null,
-      refreshToken: null,
-      expiresIn: null,
+    (set, get) => ({
+      csrfToken: null,
+      expiresAt: null,
       isAuthenticated: false,
 
-      setTokens: (token, refreshToken, expiresIn) =>
-        set({ token, refreshToken, expiresIn, isAuthenticated: true }),
+      setAuth: (csrfToken, expiresIn) =>
+        set({
+          csrfToken,
+          expiresAt: Date.now() + expiresIn * 1000,
+          isAuthenticated: true,
+        }),
+
+      updateAccessToken: (csrfToken, expiresIn) =>
+        set({
+          csrfToken,
+          expiresAt: Date.now() + expiresIn * 1000,
+        }),
 
       logout: () =>
         set({
-          token: null,
-          refreshToken: null,
-          expiresIn: null,
+          csrfToken: null,
+          expiresAt: null,
           isAuthenticated: false,
         }),
+
+      isTokenExpired: () => {
+        const { expiresAt } = get();
+        if (!expiresAt) return true;
+        return Date.now() >= expiresAt;
+      },
     }),
     {
-      name: 'admin-auth', // localStorage key
+      name: 'admin-auth',
       partialize: (state) => ({
-        token: state.token,
-        refreshToken: state.refreshToken,
-        expiresIn: state.expiresIn,
+        csrfToken: state.csrfToken,
+        expiresAt: state.expiresAt,
         isAuthenticated: state.isAuthenticated,
       }),
     },

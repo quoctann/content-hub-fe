@@ -28,9 +28,6 @@ export const env = {
     ? "/api"
     : (import.meta.env.VITE_API_BASE_URL || ""),
 
-  /** API key for X-API-Key header authentication */
-  API_KEY: import.meta.env.VITE_API_KEY || "",
-
   /** True when running in development mode (npm run dev) */
   IS_DEV: import.meta.env.DEV,
 

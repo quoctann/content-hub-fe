@@ -12,17 +12,16 @@ import { useAuthStore } from './stores/auth.store';
 
 const queryClient = new QueryClient();
 
-// A wrapper for <Route> that redirects to the login
-// screen if you're not yet authenticated.
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isTokenExpired = useAuthStore((state) => state.isTokenExpired);
+  const logout = useAuthStore((state) => state.logout);
   const location = useLocation();
 
-  if (!isAuthenticated) {
-    // Redirect them to the /admin/login page, but save the current location they were
-    // trying to go to when they were redirected. This allows us to send them
-    // along to that page after they login, which is a nicer user experience
-    // than dropping them off on the home page.
+  if (!isAuthenticated || isTokenExpired()) {
+    if (isTokenExpired()) {
+      logout();
+    }
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 

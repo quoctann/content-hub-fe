@@ -17,8 +17,12 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
+  csrf_token: string;
+  expires_in: number;
+}
+
+export interface RefreshResponse {
+  csrf_token: string;
   expires_in: number;
 }
 

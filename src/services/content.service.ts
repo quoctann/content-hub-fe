@@ -141,7 +141,7 @@ export function downloadContent(item: ContentItem): void {
     URL.revokeObjectURL(url);
   } else if (item.type === "image") {
     // For images, open in new tab (in real app, would trigger actual download)
-    window.open(item.content, "_blank");
+    window.open(item.content, "_blank", "noopener,noreferrer");
   }
 }
 
