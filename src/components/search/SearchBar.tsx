@@ -65,6 +65,7 @@ export function SearchBar({
             onBlur={() => setTimeout(() => setIsFocused(false), 150)}
             placeholder={placeholder}
             className="pl-10"
+            autoFocus
           />
         </div>
         <Button type="submit">tìm</Button>

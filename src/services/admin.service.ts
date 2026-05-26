@@ -2,10 +2,12 @@
  * Admin Service
  *
  * All API calls for the admin dashboard.
- * Uses the adminApiClient (Bearer JWT) instead of the public apiClient (X-API-Key).
+ * Uses the adminApiClient (cookie-based auth with CSRF) instead of the public apiClient.
  *
  * Endpoints:
- *   POST   /account/login                — Login (public, uses plain axios)
+ *   POST   /account/login                — Login (sets HttpOnly cookies)
+ *   POST   /account/refresh              — Refresh access token (reads refresh_token cookie)
+ *   POST   /account/logout               — Logout (clears all cookies)
  *   GET    /admin/contents               — List all content (paginated + filtered)
  *   GET    /admin/contents/:id           — Get single content by ID
  *   POST   /admin/contents               — Create new content
@@ -24,6 +26,7 @@ import type {
   AdminSearchFilter,
   LoginRequest,
   LoginResponse,
+  RefreshResponse,
 } from '@/types/admin';
 import axios from 'axios';
 
@@ -31,15 +34,35 @@ import axios from 'axios';
 // Auth
 // =============================================================================
 
-/**
- * Login — uses a plain axios call (no Bearer token yet).
- * On success, the caller should store the returned tokens via useAuthStore.setTokens().
- */
 export async function adminLogin(req: LoginRequest): Promise<LoginResponse> {
   const res = await axios.post<LoginResponse>(`${env.API_BASE_URL}/account/login`, req, {
     headers: { 'Content-Type': 'application/json' },
+    withCredentials: true,
   });
   return res.data;
+}
+
+export async function adminRefreshToken(): Promise<RefreshResponse> {
+  const res = await axios.post<RefreshResponse>(
+    `${env.API_BASE_URL}/account/refresh`,
+    {},
+    {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    },
+  );
+  return res.data;
+}
+
+export async function adminLogout(): Promise<void> {
+  await axios.post(
+    `${env.API_BASE_URL}/account/logout`,
+    {},
+    {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    },
+  );
 }
 
 // =============================================================================

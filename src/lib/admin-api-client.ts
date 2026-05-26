@@ -2,8 +2,9 @@
  * Admin API Client
  *
  * Separate Axios instance for admin API calls.
- * Injects `Authorization: Bearer <token>` from the auth store on every request.
- * On 401 responses, clears the auth store and redirects to /admin/login.
+ * - Sends cookies automatically via `withCredentials: true`
+ * - Attaches `X-CSRF-Token` header from auth store on every mutating request
+ * - On 401, attempts a silent token refresh before logging out
  */
 
 import { env } from '@/config/env';
@@ -14,36 +15,91 @@ import axios from 'axios';
 const adminApiClient: AxiosInstance = axios.create({
   baseURL: env.API_BASE_URL,
   timeout: 15000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-/** Inject Bearer token from auth store */
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason: unknown) => void;
+}> = [];
+
+function processQueue(error: unknown) {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(undefined);
+    }
+  });
+  failedQueue = [];
+}
+
 adminApiClient.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().token;
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    const csrfToken = useAuthStore.getState().csrfToken;
+    if (csrfToken && config.method && config.method !== 'get' && config.method !== 'head') {
+      config.headers['X-CSRF-Token'] = csrfToken;
     }
     return config;
   },
   (error) => Promise.reject(error),
 );
 
-/** On 401, logout and redirect to login page */
 adminApiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
-      window.location.href = '/admin/login';
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => adminApiClient(originalRequest));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const res = await axios.post<{ csrf_token: string; expires_in: number }>(
+          `${env.API_BASE_URL}/account/refresh`,
+          {},
+          { withCredentials: true, headers: { 'Content-Type': 'application/json' } },
+        );
+
+        const { csrf_token, expires_in } = res.data;
+        useAuthStore.getState().updateAccessToken(csrf_token, expires_in);
+
+        processQueue(null);
+
+        if (csrf_token && originalRequest.method !== 'get' && originalRequest.method !== 'head') {
+          originalRequest.headers['X-CSRF-Token'] = csrf_token;
+        }
+
+        return adminApiClient(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        useAuthStore.getState().logout();
+        window.location.href = '/admin/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
+
     if (error.response) {
-      console.error(
-        `[Admin API Error] ${error.response.status}: ${error.response.statusText}`,
-        error.response.data,
-      );
+      if (env.IS_DEV) {
+        console.error(
+          `[Admin API Error] ${error.response.status}: ${error.response.statusText}`,
+          error.response.data,
+        );
+      } else {
+        console.error(`[Admin API Error] ${error.response.status}: ${error.response.statusText}`);
+      }
     } else {
       console.error('[Admin API Error]', error.message);
     }
