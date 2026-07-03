@@ -1,6 +1,6 @@
 # VITE_API_BASE_URL is baked into the frontend at build time.
 
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /src
 
 COPY package*.json ./
