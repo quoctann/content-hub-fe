@@ -89,12 +89,24 @@ export default function AdminEditDialog({
   useEffect(() => {
     localStorage.setItem(SPLIT_KEY, String(split));
   }, [split]);
-
   function leave(nextItem?: AdminContent | null) {
     if (dirty && !window.confirm('You have unsaved changes. Discard them?')) return;
     if (nextItem) onNavigate(nextItem);
     else onClose();
   }
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (
+        event.key === 'Escape' &&
+        !saving &&
+        (!dirty || window.confirm('You have unsaved changes. Discard them?'))
+      )
+        onClose();
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [saving, dirty, onClose]);
 
   function change(field: FieldName, value: string) {
     if (field === 'link') setImageError(false);
