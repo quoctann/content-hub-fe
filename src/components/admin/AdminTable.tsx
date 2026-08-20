@@ -1,5 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { AdminContent, AdminContentUpdatePayload } from '@/types/admin';
 import {
   createColumnHelper,
@@ -9,6 +18,7 @@ import {
   useReactTable,
   type ColumnSizingState,
   type SortingState,
+  type VisibilityState,
 } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import AdminDeleteConfirmDialog from './AdminDeleteConfirmDialog';
@@ -16,6 +26,7 @@ import AdminEditDialog from './AdminEditDialog';
 
 const LS_SORT_KEY = 'admin-table-sort';
 const LS_SIZE_KEY = 'admin-table-col-size';
+const LS_VISIBILITY_KEY = 'admin-table-column-visibility-v1';
 
 interface AdminTableProps {
   data: AdminContent[];
@@ -76,6 +87,13 @@ export default function AdminTable({
       return {};
     }
   });
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(LS_VISIBILITY_KEY) ?? '{}');
+    } catch {
+      return {};
+    }
+  });
 
   useEffect(() => {
     localStorage.setItem(LS_SORT_KEY, JSON.stringify(sorting));
@@ -84,6 +102,9 @@ export default function AdminTable({
   useEffect(() => {
     localStorage.setItem(LS_SIZE_KEY, JSON.stringify(columnSizing));
   }, [columnSizing]);
+  useEffect(() => {
+    localStorage.setItem(LS_VISIBILITY_KEY, JSON.stringify(columnVisibility));
+  }, [columnVisibility]);
 
   // ── Row selection (for bulk actions) ─────────────────────────────────────
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
@@ -101,6 +122,10 @@ export default function AdminTable({
     helper.display({
       id: 'select',
       size: 40,
+      minSize: 40,
+      maxSize: 54,
+      enableResizing: false,
+      enableHiding: false,
       header: ({ table }) => (
         <Checkbox
           checked={
@@ -123,13 +148,19 @@ export default function AdminTable({
 
     helper.accessor('id', {
       header: 'ID',
+      id: 'id',
       size: 70,
+      minSize: 55,
+      maxSize: 140,
       cell: (i) => <span className="text-xs font-mono text-muted-foreground">{i.getValue()}</span>,
     }),
 
     helper.accessor('type', {
       header: 'Type',
+      id: 'type',
       size: 80,
+      minSize: 65,
+      maxSize: 130,
       cell: (i) => {
         const type = i.getValue();
         const bgColor =
@@ -146,7 +177,10 @@ export default function AdminTable({
 
     helper.accessor('is_hidden', {
       header: 'Visible',
+      id: 'is_hidden',
       size: 80,
+      minSize: 70,
+      maxSize: 140,
       cell: (i) => (
         <span
           className={`text-xs font-semibold ${i.getValue() ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}
@@ -158,7 +192,10 @@ export default function AdminTable({
 
     helper.accessor('title', {
       header: 'Title',
+      id: 'title',
       size: 180,
+      minSize: 120,
+      maxSize: 420,
       cell: (i) => (
         <span title={i.getValue() ?? ''} className="block truncate">
           {truncate(i.getValue(), 40)}
@@ -168,7 +205,10 @@ export default function AdminTable({
 
     helper.accessor('text_data', {
       header: 'Text Data',
+      id: 'text_data',
       size: 200,
+      minSize: 140,
+      maxSize: 500,
       cell: (i) => (
         <span className="text-muted-foreground block truncate" title={i.getValue() ?? ''}>
           {truncate(i.getValue(), 60)}
@@ -178,7 +218,10 @@ export default function AdminTable({
 
     helper.accessor('ocr_text', {
       header: 'OCR Text',
+      id: 'ocr_text',
       size: 180,
+      minSize: 140,
+      maxSize: 500,
       cell: (i) => (
         <span className="text-muted-foreground block truncate" title={i.getValue() ?? ''}>
           {truncate(i.getValue(), 50)}
@@ -188,7 +231,10 @@ export default function AdminTable({
 
     helper.accessor('caption', {
       header: 'Caption',
+      id: 'caption',
       size: 160,
+      minSize: 120,
+      maxSize: 420,
       cell: (i) => (
         <span className="text-muted-foreground block truncate" title={i.getValue() ?? ''}>
           {truncate(i.getValue(), 40)}
@@ -201,12 +247,17 @@ export default function AdminTable({
       id: 'thumbnail',
       header: 'Thumbnail',
       size: 80,
+      minSize: 70,
+      maxSize: 140,
       cell: ({ row }) => <Thumbnail item={row.original} />,
     }),
 
     helper.accessor('updated_at', {
       header: 'Last Update',
+      id: 'updated_at',
       size: 160,
+      minSize: 130,
+      maxSize: 260,
       cell: (i) => (i.getValue() ? new Date(i.getValue()!).toLocaleString() : '—'),
     }),
 
@@ -215,6 +266,9 @@ export default function AdminTable({
       id: 'actions',
       header: 'Actions',
       size: 180,
+      minSize: 150,
+      maxSize: 300,
+      enableHiding: false,
       cell: ({ row }) => {
         const item = row.original;
         const isToggling = togglingId === item.id;
@@ -266,7 +320,7 @@ export default function AdminTable({
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, columnSizing, rowSelection },
+    state: { sorting, columnSizing, rowSelection, columnVisibility },
     onSortingChange: (s) => {
       setSorting(s);
     },
@@ -274,6 +328,8 @@ export default function AdminTable({
       setColumnSizing(s);
     },
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
+    getRowId: (row) => String(row.id),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     columnResizeMode: 'onChange',
@@ -336,6 +392,48 @@ export default function AdminTable({
         </div>
       )}
 
+      <div className="mb-2 flex justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Show columns</DropdownMenuLabel>
+            {table
+              .getAllLeafColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(checked) => column.toggleVisibility(!!checked)}
+                >
+                  {column.id === 'is_hidden'
+                    ? 'Visible'
+                    : column.id === 'text_data'
+                      ? 'Text Data'
+                      : column.id === 'ocr_text'
+                        ? 'OCR Text'
+                        : column.id === 'updated_at'
+                          ? 'Last Update'
+                          : column.id[0].toUpperCase() + column.id.slice(1)}
+                </DropdownMenuCheckboxItem>
+              ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={() => {
+                setColumnVisibility({});
+                setColumnSizing({});
+                setSorting([]);
+              }}
+            >
+              Reset preferences
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <div className="border border-border rounded-lg overflow-x-auto bg-card relative">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
@@ -345,14 +443,17 @@ export default function AdminTable({
             </div>
           </div>
         )}
-        <table className="w-full border-collapse text-sm" style={{ width: table.getTotalSize() }}>
+        <table
+          className="table-fixed border-collapse text-sm"
+          style={{ width: table.getTotalSize(), minWidth: '100%' }}
+        >
           <thead>
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id} className="border-b border-border">
                 {hg.headers.map((header) => (
                   <th
                     key={header.id}
-                    className={`relative text-left px-4 py-3 font-semibold text-muted-foreground ${header.column.getCanSort() ? 'cursor-pointer hover:bg-muted select-none' : ''}`}
+                    className={`relative text-left px-3 py-2 font-semibold text-muted-foreground ${header.column.getCanSort() ? 'cursor-pointer hover:bg-muted select-none' : ''}`}
                     style={{ width: header.getSize() }}
                     onClick={header.column.getToggleSortingHandler()}
                   >
@@ -371,9 +472,15 @@ export default function AdminTable({
                     {/* Resize handle */}
                     {header.column.getCanResize() && (
                       <div
-                        className={`select-none touch-none w-1 h-full absolute right-0 top-0 bg-transparent hover:bg-primary/30 cursor-col-resize ${header.column.getIsResizing() ? 'bg-primary/50' : ''}`}
-                        onMouseDown={header.getResizeHandler()}
-                        onTouchStart={header.getResizeHandler()}
+                        className={`select-none touch-none w-4 h-full absolute right-[-8px] top-0 z-10 cursor-col-resize after:absolute after:left-[7px] after:top-0 after:h-full after:w-px after:bg-border hover:after:bg-primary ${header.column.getIsResizing() ? 'bg-primary/20' : ''}`}
+                        onMouseDown={(event) => {
+                          event.stopPropagation();
+                          header.getResizeHandler()(event);
+                        }}
+                        onTouchStart={(event) => {
+                          event.stopPropagation();
+                          header.getResizeHandler()(event);
+                        }}
                         onClick={(e) => e.stopPropagation()}
                       />
                     )}
@@ -414,7 +521,7 @@ export default function AdminTable({
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    className="px-4 py-3 text-sm"
+                    className="px-3 py-2 text-sm"
                     style={{ width: cell.column.getSize() }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -431,6 +538,8 @@ export default function AdminTable({
         <AdminEditDialog
           key={editTarget.id}
           item={editTarget}
+          items={data}
+          onNavigate={setEditTarget}
           saving={dialogSaving}
           onClose={() => setEditTarget(null)}
           onSave={async (id, payload) => {

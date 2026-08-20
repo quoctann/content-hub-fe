@@ -82,7 +82,7 @@ export async function adminListContent(
     page,
     page_size: pageSize,
   };
-  if (filter.q) params.q = filter.q;
+  if (filter.q) params.keywords = filter.q;
   if (filter.type) params.type = filter.type;
   if (filter.visible === 'true' || filter.visible === 'false') {
     params.visible = filter.visible;
