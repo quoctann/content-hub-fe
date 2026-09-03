@@ -10,10 +10,10 @@
  * we pass the next_cursor from the previous response.
  */
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import type { ContentItem, SearchFilter } from "@/types/content";
-import { searchContent, parseSearchQuery } from "@/services/content.service";
-import { useSearchHistoryStore } from "@/stores/search-history.store";
+import { useState, useCallback, useEffect, useRef } from 'react';
+import type { ContentItem, SearchFilter } from '@/types/content';
+import { searchContent, parseSearchQuery } from '@/services/content.service';
+import { useSearchHistoryStore } from '@/stores/search-history.store';
 
 interface UseSearchResult {
   items: ContentItem[];
@@ -36,6 +36,9 @@ export function useSearch(initialQuery?: string): UseSearchResult {
 
   const addSearch = useSearchHistoryStore((state) => state.addSearch);
   const initialQueryRef = useRef(initialQuery);
+  const requestVersionRef = useRef(0);
+  const isSearchingRef = useRef(false);
+  const isLoadingMoreRef = useRef(false);
 
   // Execute initial query if provided
   // Intentionally not including 'search' in deps to avoid infinite loop
@@ -50,6 +53,8 @@ export function useSearch(initialQuery?: string): UseSearchResult {
 
   const search = useCallback(
     async (query: string) => {
+      const requestVersion = ++requestVersionRef.current;
+      isSearchingRef.current = true;
       setIsLoading(true);
       setPage(1);
 
@@ -58,6 +63,8 @@ export function useSearch(initialQuery?: string): UseSearchResult {
 
       try {
         const response = await searchContent(filter, 1);
+        if (requestVersion !== requestVersionRef.current) return;
+
         setItems(response.items);
         setHasMore(response.hasMore);
         setTotal(response.total);
@@ -68,43 +75,59 @@ export function useSearch(initialQuery?: string): UseSearchResult {
           addSearch(query);
         }
       } catch (error) {
-        console.error("Search failed:", error);
+        if (requestVersion !== requestVersionRef.current) return;
+
+        console.error('Search failed:', error);
         setItems([]);
         setHasMore(false);
         setTotal(0);
         setNextCursor(undefined);
       } finally {
-        setIsLoading(false);
+        if (requestVersion === requestVersionRef.current) {
+          isSearchingRef.current = false;
+          setIsLoading(false);
+        }
       }
     },
     [addSearch],
   );
 
   const loadMore = useCallback(async () => {
-    if (isLoading || !hasMore || !nextCursor) return;
+    // Scroll events can fire repeatedly before React applies setIsLoading.
+    if (isLoadingMoreRef.current || isSearchingRef.current || !hasMore || !nextCursor) return;
 
+    const requestVersion = requestVersionRef.current;
+    isLoadingMoreRef.current = true;
     setIsLoading(true);
     const nextPage = page + 1;
 
     try {
-      const response = await searchContent(
-        currentFilter,
-        nextPage,
-        10,
-        nextCursor,
-      );
-      setItems((prev) => [...prev, ...response.items]);
+      const response = await searchContent(currentFilter, nextPage, 10, nextCursor);
+      if (requestVersion !== requestVersionRef.current) return;
+
+      setItems((prev) => {
+        const existingIDs = new Set(prev.map((item) => item.id));
+        return [...prev, ...response.items.filter((item) => !existingIDs.has(item.id))];
+      });
       setHasMore(response.hasMore);
       setPage(nextPage);
       setNextCursor(response.nextCursor || undefined);
     } catch (error) {
-      console.error("Load more failed:", error);
+      if (requestVersion === requestVersionRef.current) {
+        console.error('Load more failed:', error);
+      }
     } finally {
-      setIsLoading(false);
+      isLoadingMoreRef.current = false;
+      if (requestVersion === requestVersionRef.current) {
+        setIsLoading(false);
+      }
     }
-  }, [isLoading, hasMore, nextCursor, page, currentFilter]);
+  }, [hasMore, nextCursor, page, currentFilter]);
 
   const reset = useCallback(() => {
+    requestVersionRef.current++;
+    isSearchingRef.current = false;
+    isLoadingMoreRef.current = false;
     setItems([]);
     setIsLoading(false);
     setHasMore(false);
