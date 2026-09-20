@@ -69,6 +69,7 @@ export default function AdminAddDialog({ onAdd, onClose, saving }: AdminAddDialo
                 <SelectGroup>
                   <SelectItem value="text">Text</SelectItem>
                   <SelectItem value="image">Image</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -105,7 +106,9 @@ export default function AdminAddDialog({ onAdd, onClose, saving }: AdminAddDialo
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2 text-foreground">Image URL</label>
+            <label className="block text-sm font-semibold mb-2 text-foreground">
+              {type === 'video' ? 'Video URL (CDN link)' : 'Image URL'}
+            </label>
             <Input name="link" type="url" placeholder="https://..." />
           </div>
 

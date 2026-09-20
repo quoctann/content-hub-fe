@@ -1,5 +1,14 @@
 import { useState, useCallback, memo } from 'react';
-import { Copy, Download, ChevronDown, ChevronUp, Check, FileText, Image } from 'lucide-react';
+import {
+  Copy,
+  Download,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  FileText,
+  Image,
+  Video,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -12,8 +21,8 @@ interface ContentCardProps {
 }
 
 export const ContentCard = memo(function ContentCard({ item }: ContentCardProps) {
-  // Default expanded for images, collapsed for text items
-  const [isExpanded, setIsExpanded] = useState(item.type === 'image');
+  // Default expanded for images/videos, collapsed for text items
+  const [isExpanded, setIsExpanded] = useState(item.type === 'image' || item.type === 'video');
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -33,11 +42,10 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
   }, [item]);
 
   const toggleExpand = useCallback(() => {
-    setIsExpanded(prev => !prev);
+    setIsExpanded((prev) => !prev);
   }, []);
 
-
-  const TypeIcon = item.type === 'text' ? FileText : Image;
+  const TypeIcon = item.type === 'text' ? FileText : item.type === 'video' ? Video : Image;
 
   return (
     <Card className="group overflow-hidden transition-shadow hover:shadow-md">
@@ -58,21 +66,39 @@ export const ContentCard = memo(function ContentCard({ item }: ContentCardProps)
           </div>
         </div>
         <Button variant="ghost" size="icon" onClick={toggleExpand} className="shrink-0">
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
       </CardHeader>
 
       <CardContent>
         {item.type === 'text' ? (
-          <p className={`text-sm text-muted-foreground whitespace-pre-wrap ${isExpanded ? '' : 'line-clamp-2'}`}>
+          <p
+            className={`text-sm text-muted-foreground whitespace-pre-wrap ${isExpanded ? '' : 'line-clamp-2'}`}
+          >
             {item.content}
           </p>
+        ) : item.type === 'video' ? (
+          <div
+            className={`overflow-auto rounded-lg bg-muted ${isExpanded ? 'max-h-screen' : 'max-h-48'}`}
+          >
+            {item.content ? (
+              <video
+                src={item.content}
+                controls
+                preload="metadata"
+                playsInline
+                className="w-full h-auto object-contain"
+              />
+            ) : (
+              <div className="flex h-32 w-full items-center justify-center bg-muted">
+                <Video className="h-10 w-10 text-muted-foreground/50" />
+              </div>
+            )}
+          </div>
         ) : (
-          <div className={`overflow-auto rounded-lg bg-muted ${isExpanded ? 'max-h-screen' : 'max-h-48'}`}>
+          <div
+            className={`overflow-auto rounded-lg bg-muted ${isExpanded ? 'max-h-screen' : 'max-h-48'}`}
+          >
             {item.content ? (
               <img
                 src={item.content}

@@ -6,7 +6,7 @@
 // Frontend types (used by UI components)
 // =============================================================================
 
-export type ContentType = "text" | "image";
+export type ContentType = 'text' | 'image' | 'video';
 
 export interface ContentItem {
   id: string;
@@ -98,9 +98,8 @@ export function mapApiContent(apiContent: ApiContent): ContentItem {
     id: String(apiContent.id),
     type: apiContent.type,
     title: apiContent.title,
-    content:
-        apiContent.type === "image" ? apiContent.link : (apiContent.text_data ?? ''),
-    category: "", // Backend does not have category field
+    content: apiContent.type === 'text' ? (apiContent.text_data ?? '') : apiContent.link,
+    category: '', // Backend does not have category field
     rank: apiContent.rank || undefined, // Only include if rank > 0
     createdAt: new Date(apiContent.created_at),
     updatedAt: new Date(apiContent.updated_at),

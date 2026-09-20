@@ -27,7 +27,7 @@ const FIELD_LABELS: Record<FieldName, string> = {
   text_data: 'Text Data',
   ocr_text: 'OCR Text',
   caption: 'Caption',
-  link: 'Image URL',
+  link: 'Image/Video URL',
 };
 const FIELD_KEY = 'admin-editor-fields-v1';
 const SPLIT_KEY = 'admin-editor-split-v1';
@@ -117,9 +117,10 @@ export default function AdminEditDialog({
     setFormError(null);
     const nextErrors: Record<string, string> = {};
     if (values.link.trim()) {
+      const linkLabel = item.type === 'video' ? 'Video URL' : 'Image URL';
       try {
         if (!['http:', 'https:'].includes(new URL(values.link.trim()).protocol))
-          nextErrors.link = 'Image URL must use http or https.';
+          nextErrors.link = `${linkLabel} must use http or https.`;
       } catch {
         nextErrors.link = 'Enter a valid URL.';
       }
@@ -224,9 +225,18 @@ export default function AdminEditDialog({
                 className="max-h-full max-w-full object-contain"
                 onError={() => setImageError(true)}
               />
+            ) : item.type === 'video' && values.link && !imageError ? (
+              <video
+                src={values.link}
+                controls
+                preload="metadata"
+                playsInline
+                className="max-h-full max-w-full object-contain"
+                onError={() => setImageError(true)}
+              />
             ) : (
               <div className="text-center text-sm text-muted-foreground">
-                {imageError ? 'Image could not be loaded.' : 'No image preview available.'}
+                {imageError ? 'Preview could not be loaded.' : 'No preview available.'}
               </div>
             )}
           </section>
@@ -296,7 +306,11 @@ export default function AdminEditDialog({
                 </Field>
               )}
               {visibleFields.link && (
-                <Field label="Image URL" error={errors.link} className="lg:col-span-2">
+                <Field
+                  label={item.type === 'video' ? 'Video URL (CDN link)' : 'Image URL'}
+                  error={errors.link}
+                  className="lg:col-span-2"
+                >
                   <Input
                     type="url"
                     value={values.link}

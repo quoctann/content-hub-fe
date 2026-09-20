@@ -41,8 +41,18 @@ interface AdminTableProps {
 const helper = createColumnHelper<AdminContent>();
 
 function Thumbnail({ item }: { item: AdminContent }) {
-  if (item.type !== 'image' || !item.link) {
+  if (!item.link || (item.type !== 'image' && item.type !== 'video')) {
     return <span className="text-muted-foreground text-sm">—</span>;
+  }
+  if (item.type === 'video') {
+    return (
+      <video
+        src={item.link}
+        muted
+        preload="metadata"
+        className="w-12 h-12 object-cover rounded border border-border"
+      />
+    );
   }
   return (
     <img
@@ -166,7 +176,9 @@ export default function AdminTable({
         const bgColor =
           type === 'text'
             ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
-            : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200';
+            : type === 'video'
+              ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200'
+              : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200';
         return (
           <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase ${bgColor}`}>
             {type}

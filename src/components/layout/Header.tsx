@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Moon, Sun, FileText, Image, Info } from 'lucide-react';
+import { Menu, Moon, Sun, FileText, Image, Video, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useTheme } from '@/hooks/use-theme';
@@ -13,6 +13,7 @@ export function Header() {
   const menuItems = [
     { label: 'văn mẫu', href: '/search?type=text', icon: FileText },
     { label: 'hình ảnh', href: '/search?type=image', icon: Image },
+    { label: 'video', href: '/search?type=video', icon: Video },
     { label: 'giới thiệu', href: '/about', icon: Info },
   ];
 
@@ -27,7 +28,7 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          {menuItems.map(item => (
+          {menuItems.map((item) => (
             <Link
               key={item.href}
               to={item.href}
@@ -38,11 +39,7 @@ export function Header() {
             </Link>
           ))}
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
-            {theme === 'light' ? (
-              <Moon className="h-5 w-5" />
-            ) : (
-              <Sun className="h-5 w-5" />
-            )}
+            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </Button>
         </nav>
 
@@ -54,7 +51,7 @@ export function Header() {
           </SheetTrigger>
           <SheetContent side="right" className="w-72">
             <div className="flex flex-col gap-6 pt-6 mx-auto">
-              {menuItems.map(item => (
+              {menuItems.map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}
@@ -66,7 +63,11 @@ export function Header() {
                 </Link>
               ))}
               <div className="border-t border-border pt-4">
-                <Button variant="outline" className="w-full justify-start gap-3" onClick={toggleTheme}>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-3"
+                  onClick={toggleTheme}
+                >
                   {theme === 'light' ? (
                     <>
                       <Moon className="h-5 w-5" />

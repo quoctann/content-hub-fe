@@ -18,7 +18,7 @@ export default function Index() {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
-  
+
   const recentSearches = useSearchHistoryStore((state) => state.recentSearches);
 
   // Typing animation effect
@@ -51,20 +51,24 @@ export default function Index() {
     }
   }, [displayText, isTyping, currentTextIndex]);
 
-  const handleSearch = useCallback((query: string) => {
-    if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
-    } else {
-      navigate('/search');
-    }
-  }, [navigate]);
+  const handleSearch = useCallback(
+    (query: string) => {
+      if (query.trim()) {
+        navigate(`/search?q=${encodeURIComponent(query)}`);
+      } else {
+        navigate('/search');
+      }
+    },
+    [navigate],
+  );
 
   return (
     <Layout>
       <section className="container flex flex-col items-center justify-center py-20 md:py-32">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
-            meme <span className="text-muted-foreground">(n)</span> <span className="italic">/miːm/</span>
+            meme <span className="text-muted-foreground">(n)</span>{' '}
+            <span className="italic">/miːm/</span>
           </h1>
           <p className="mt-4 h-8 text-xl text-muted-foreground md:text-2xl">
             {displayText}
@@ -82,9 +86,19 @@ export default function Index() {
           <div className="mt-6 text-sm text-muted-foreground">
             <p className="font-medium">mẹo:</p>
             <ul className="mt-2 space-y-1">
-              <li><code className="rounded bg-muted px-1.5 py-0.5">@text</code> hoặc <code className="rounded bg-muted px-1.5 py-0.5">@image</code> - lọc nội dung ảnh hoặc văn bản</li>
-              <li>xài dấu phẩy <code className="rounded bg-muted px-1.5 py-0.5">,</code> để tìm chi tiết hơn</li>
-              <li>dí dụ: <code className="rounded bg-muted px-1.5 py-0.5">banh, mi @image</code></li>
+              <li>
+                <code className="rounded bg-muted px-1.5 py-0.5">@text</code>,{' '}
+                <code className="rounded bg-muted px-1.5 py-0.5">@image</code> hoặc{' '}
+                <code className="rounded bg-muted px-1.5 py-0.5">@video</code> - lọc nội dung theo
+                loại
+              </li>
+              <li>
+                xài dấu phẩy <code className="rounded bg-muted px-1.5 py-0.5">,</code> để tìm chi
+                tiết hơn
+              </li>
+              <li>
+                dí dụ: <code className="rounded bg-muted px-1.5 py-0.5">banh, mi @image</code>
+              </li>
             </ul>
           </div>
         </div>

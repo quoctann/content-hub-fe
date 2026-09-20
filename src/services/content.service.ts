@@ -18,34 +18,39 @@ import type {
   ContentType,
   SearchFilter,
   SearchResponse,
-} from "@/types/content";
-import { mapApiContent } from "@/types/content";
-import { apiGet } from "@/lib/api-client";
+} from '@/types/content';
+import { mapApiContent } from '@/types/content';
+import { apiGet } from '@/lib/api-client';
 
 // Default number of results per page
 const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * Parse search query string into structured filter
- * Supports: @image/@text for type filtering
+ * Supports: @image/@text/@video for type filtering
  */
 export function parseSearchQuery(query: string): SearchFilter {
   const categories: string[] = [];
   let keyword = query;
   let type: ContentType | undefined;
 
-  // Extract type filter (e.g., @image, @text, @i, @t)
-  const typeMatches = query.match(/@(image|text|i|t)\b/gi);
+  // Extract type filter (e.g., @image, @text, @video, @i, @t, @v)
+  const typeMatches = query.match(/@(image|text|video|i|t|v)\b/gi);
   if (typeMatches) {
     const typeStr = typeMatches[0].slice(1).toLowerCase();
-    type = typeStr === "i" || typeStr === "image" ? "image" : "text";
+    type =
+      typeStr === 'i' || typeStr === 'image'
+        ? 'image'
+        : typeStr === 'v' || typeStr === 'video'
+          ? 'video'
+          : 'text';
     typeMatches.forEach((t) => {
-      keyword = keyword.replace(t, "");
+      keyword = keyword.replace(t, '');
     });
   }
 
   // Clean up keyword
-  keyword = keyword.trim().replace(/\s+/g, " ");
+  keyword = keyword.trim().replace(/\s+/g, ' ');
 
   return {
     keyword: keyword || undefined,
@@ -96,7 +101,7 @@ export async function searchContent(
   }
 
   // Call the backend search API - now returns wrapped response with pagination
-  const response = await apiGet<ApiSearchResponse>("/contents", { params });
+  const response = await apiGet<ApiSearchResponse>('/contents', { params });
 
   // Map backend types to frontend types
   const items = response.items.map(mapApiContent);
@@ -129,19 +134,19 @@ export async function getContentById(id: string): Promise<ContentItem | null> {
 export function downloadContent(item: ContentItem): void {
   if (!item.content) return;
 
-  if (item.type === "text") {
-    const blob = new Blob([item.content], { type: "text/plain" });
+  if (item.type === 'text') {
+    const blob = new Blob([item.content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `${item.title.replace(/\s+/g, "-").toLowerCase()}.txt`;
+    link.download = `${item.title.replace(/\s+/g, '-').toLowerCase()}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  } else if (item.type === "image") {
-    // For images, open in new tab (in real app, would trigger actual download)
-    window.open(item.content, "_blank", "noopener,noreferrer");
+  } else if (item.type === 'image' || item.type === 'video') {
+    // For images/videos, open the CDN URL in a new tab (in real app, would trigger actual download)
+    window.open(item.content, '_blank', 'noopener,noreferrer');
   }
 }
 
@@ -153,30 +158,34 @@ export async function copyToClipboard(item: ContentItem): Promise<boolean> {
   if (!item.content) return false;
 
   try {
-    if (item.type === "text") {
+    if (item.type === 'text') {
       await navigator.clipboard.writeText(item.content);
       return true;
-    } else if (item.type === "image") {
+    } else if (item.type === 'image') {
       // Fetch the image and copy as blob data
       const response = await fetch(item.content);
       const blob = await response.blob();
 
       // Convert to PNG if needed (clipboard API works best with PNG)
       let imageBlob = blob;
-      if (blob.type !== "image/png") {
+      if (blob.type !== 'image/png') {
         imageBlob = await convertToPng(blob);
       }
 
       await navigator.clipboard.write([
         new ClipboardItem({
-          "image/png": imageBlob,
+          'image/png': imageBlob,
         }),
       ]);
+      return true;
+    } else if (item.type === 'video') {
+      // No clipboard API exists for video blobs; copy the CDN URL as text instead.
+      await navigator.clipboard.writeText(item.content);
       return true;
     }
     return false;
   } catch (error) {
-    console.error("Failed to copy to clipboard:", error);
+    console.error('Failed to copy to clipboard:', error);
     return false;
   }
 }
@@ -188,12 +197,12 @@ async function convertToPng(blob: Blob): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
       if (!ctx) {
-        reject(new Error("Failed to get canvas context"));
+        reject(new Error('Failed to get canvas context'));
         return;
       }
       ctx.drawImage(img, 0, 0);
@@ -201,12 +210,12 @@ async function convertToPng(blob: Blob): Promise<Blob> {
         if (pngBlob) {
           resolve(pngBlob);
         } else {
-          reject(new Error("Failed to convert to PNG"));
+          reject(new Error('Failed to convert to PNG'));
         }
-      }, "image/png");
+      }, 'image/png');
     };
-    img.onerror = () => reject(new Error("Failed to load image"));
-    img.crossOrigin = "anonymous";
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.crossOrigin = 'anonymous';
     img.src = URL.createObjectURL(blob);
   });
 }

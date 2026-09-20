@@ -325,6 +325,7 @@ export default function AdminDashboard() {
                   <SelectItem value="all-types">All types</SelectItem>
                   <SelectItem value="text">Text</SelectItem>
                   <SelectItem value="image">Image</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
