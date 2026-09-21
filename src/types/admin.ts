@@ -67,6 +67,20 @@ export interface AdminContentUpdatePayload {
   is_hidden?: boolean;
 }
 
+export interface AdminUploadLimits {
+  enabled: boolean;
+  max_batch_files: number;
+  max_file_bytes: number;
+  allowed_mime_types: string[];
+}
+
+export interface AdminMediaUploadResponse {
+  url: string;
+  type: Extract<ContentType, 'image' | 'video'>;
+  mime_type: string;
+  size_bytes: number;
+}
+
 // =============================================================================
 // Admin List Response
 // =============================================================================

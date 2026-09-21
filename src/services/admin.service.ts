@@ -17,7 +17,7 @@
  */
 
 import { env } from '@/config/env';
-import { adminDelete, adminGet, adminPatch, adminPost, adminPut } from '@/lib/admin-api-client';
+import { adminDelete, adminGet, adminPatch, adminPost, adminPut, adminUpload } from '@/lib/admin-api-client';
 import type {
   AdminContent,
   AdminContentCreatePayload,
@@ -27,6 +27,8 @@ import type {
   LoginRequest,
   LoginResponse,
   RefreshResponse,
+  AdminMediaUploadResponse,
+  AdminUploadLimits,
 } from '@/types/admin';
 import axios from 'axios';
 
@@ -100,6 +102,16 @@ export async function adminCreateContent(
   payload: AdminContentCreatePayload,
 ): Promise<AdminContent> {
   return adminPost<AdminContent>('/admin/contents', payload);
+}
+
+export async function adminGetUploadLimits(): Promise<AdminUploadLimits> {
+  return adminGet<AdminUploadLimits>('/admin/media/limits');
+}
+
+export async function adminUploadMedia(file: File): Promise<AdminMediaUploadResponse> {
+  const data = new FormData();
+  data.append('file', file);
+  return adminUpload<AdminMediaUploadResponse>('/admin/media', data);
 }
 
 /** Update an existing content item */
