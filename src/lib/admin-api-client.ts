@@ -121,6 +121,14 @@ export async function adminPost<T>(
   return res.data;
 }
 
+export async function adminUpload<T>(url: string, data: FormData): Promise<T> {
+  const res = await adminApiClient.post<T>(url, data, {
+    timeout: 180000,
+    headers: { 'Content-Type': undefined },
+  });
+  return res.data;
+}
+
 export async function adminPut<T>(
   url: string,
   data?: unknown,

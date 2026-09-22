@@ -11,15 +11,23 @@ import {
 import type { AdminContentCreatePayload } from '@/types/admin';
 import type { ContentType } from '@/types/content';
 import { useState } from 'react';
+import AdminBulkUpload from './AdminBulkUpload';
 
 interface AdminAddDialogProps {
   onAdd: (payload: AdminContentCreatePayload) => Promise<void>;
   onClose: () => void;
   saving: boolean;
+  onBulkCompleted: () => Promise<void>;
 }
 
-export default function AdminAddDialog({ onAdd, onClose, saving }: AdminAddDialogProps) {
+export default function AdminAddDialog({
+  onAdd,
+  onClose,
+  saving,
+  onBulkCompleted,
+}: AdminAddDialogProps) {
   const [type, setType] = useState<ContentType>('text');
+  const [mode, setMode] = useState<'manual' | 'upload'>('manual');
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -58,75 +66,97 @@ export default function AdminAddDialog({ onAdd, onClose, saving }: AdminAddDialo
           </button>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-foreground">Type *</label>
-            <Select value={type} onValueChange={(e) => setType(e as ContentType)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="text">Text</SelectItem>
-                  <SelectItem value="image">Image</SelectItem>
-                  <SelectItem value="video">Video</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="flex gap-2 mb-4">
+          <Button
+            type="button"
+            variant={mode === 'manual' ? 'default' : 'outline'}
+            onClick={() => setMode('manual')}
+            disabled={saving}
+          >
+            Manual entry
+          </Button>
+          <Button
+            type="button"
+            variant={mode === 'upload' ? 'default' : 'outline'}
+            onClick={() => setMode('upload')}
+            disabled={saving}
+          >
+            Upload files
+          </Button>
+        </div>
+        {mode === 'upload' ? (
+          <AdminBulkUpload onCompleted={onBulkCompleted} />
+        ) : (
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-foreground">Type *</label>
+              <Select value={type} onValueChange={(e) => setType(e as ContentType)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="image">Image</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-foreground">Title</label>
-            <Input name="title" placeholder="Content title" />
-          </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-foreground">Title</label>
+              <Input name="title" placeholder="Content title" />
+            </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-foreground">Text Data</label>
-            <textarea
-              className="w-full px-3 py-2 border border-input rounded-md bg-transparent text-sm font-mono resize-none outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:opacity-50"
-              name="text_data"
-              rows={4}
-              placeholder="Text content..."
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-foreground">Text Data</label>
+              <textarea
+                className="w-full px-3 py-2 border border-input rounded-md bg-transparent text-sm font-mono resize-none outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:opacity-50"
+                name="text_data"
+                rows={4}
+                placeholder="Text content..."
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-foreground">OCR Text</label>
-            <textarea
-              className="w-full px-3 py-2 border border-input rounded-md bg-transparent text-sm font-mono resize-none outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:opacity-50"
-              name="ocr_text"
-              rows={3}
-              placeholder="OCR extracted text..."
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-foreground">OCR Text</label>
+              <textarea
+                className="w-full px-3 py-2 border border-input rounded-md bg-transparent text-sm font-mono resize-none outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:opacity-50"
+                name="ocr_text"
+                rows={3}
+                placeholder="OCR extracted text..."
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-foreground">Caption</label>
-            <Input name="caption" placeholder="Image caption..." />
-          </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-foreground">Caption</label>
+              <Input name="caption" placeholder="Image caption..." />
+            </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-foreground">
-              {type === 'video' ? 'Video URL (CDN link)' : 'Image URL'}
-            </label>
-            <Input name="link" type="url" placeholder="https://..." />
-          </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-foreground">
+                {type === 'video' ? 'Video URL (CDN link)' : 'Image URL'}
+              </label>
+              <Input name="link" type="url" placeholder="https://..." />
+            </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
-            <Button type="submit" disabled={saving} className="w-full sm:flex-1">
-              {saving ? 'Adding…' : 'Add'}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={saving}
-              className="w-full sm:flex-1"
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
+              <Button type="submit" disabled={saving} className="w-full sm:flex-1">
+                {saving ? 'Adding…' : 'Add'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={saving}
+                className="w-full sm:flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

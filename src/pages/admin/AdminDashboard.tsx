@@ -453,6 +453,11 @@ export default function AdminDashboard() {
         <AdminAddDialog
           saving={addSaving}
           onAdd={handleAdd}
+          onBulkCompleted={async () => {
+            await fetchData(filter, 1, pageSize);
+            setPage(1);
+            setPageInput('1');
+          }}
           onClose={() => setShowAddDialog(false)}
         />
       )}
