@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { adminCreateContent, adminGetUploadLimits, adminUploadMedia } from '@/services/admin.service';
 import type { AdminMediaUploadResponse, AdminUploadLimits } from '@/types/admin';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type QueueStatus = 'queued' | 'uploading' | 'creating' | 'completed' | 'failed' | 'rejected' | 'uncertain';
 
@@ -14,6 +14,7 @@ interface QueueItem {
   status: QueueStatus;
   result?: AdminMediaUploadResponse;
   error?: string;
+  previewUrl: string;
 }
 
 interface AdminBulkUploadProps {
@@ -40,12 +41,17 @@ export default function AdminBulkUpload({ onCompleted }: AdminBulkUploadProps) {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [loadingLimits, setLoadingLimits] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const previewUrls = useRef(new Set<string>());
 
   useEffect(() => {
     adminGetUploadLimits()
       .then(setLimits)
       .catch(() => undefined)
       .finally(() => setLoadingLimits(false));
+  }, []);
+
+  useEffect(() => () => {
+    previewUrls.current.forEach((url) => URL.revokeObjectURL(url));
   }, []);
 
   function updateItem(id: string, update: Partial<QueueItem>) {
@@ -56,10 +62,17 @@ export default function AdminBulkUpload({ onCompleted }: AdminBulkUploadProps) {
     if (!files) return;
     const available = Math.max(0, limits.max_batch_files - items.length);
     const accepted = Array.from(files).slice(0, available).map((file) => ({
-      id: crypto.randomUUID(), file, title: titleFromFile(file.name), caption: '', status: (!limits.allowed_mime_types.includes(file.type) || file.size > limits.max_file_bytes) ? 'rejected' as const : 'queued' as const,
+      id: crypto.randomUUID(), file, title: titleFromFile(file.name), caption: '', previewUrl: URL.createObjectURL(file), status: (!limits.allowed_mime_types.includes(file.type) || file.size > limits.max_file_bytes) ? 'rejected' as const : 'queued' as const,
       error: !limits.allowed_mime_types.includes(file.type) ? 'Unsupported file type.' : file.size > limits.max_file_bytes ? 'File exceeds the configured size limit.' : undefined,
     }));
+    accepted.forEach((item) => previewUrls.current.add(item.previewUrl));
     setItems((current) => [...current, ...accepted]);
+  }
+
+  function removeItem(item: QueueItem) {
+    URL.revokeObjectURL(item.previewUrl);
+    previewUrls.current.delete(item.previewUrl);
+    setItems((current) => current.filter((candidate) => candidate.id !== item.id));
   }
 
   async function process(item: QueueItem) {
@@ -116,10 +129,15 @@ export default function AdminBulkUpload({ onCompleted }: AdminBulkUploadProps) {
       <Input id="admin-upload-files" type="file" multiple accept={limits.allowed_mime_types.join(',')} disabled={submitting} onChange={(event) => { addFiles(event.target.files); event.currentTarget.value = ''; }} />
       <p className="mt-1 text-xs text-muted-foreground">Up to {limits.max_batch_files} files, {Math.floor(limits.max_file_bytes / 1024 / 1024)} MiB each. JPEG, PNG, WebP, and MP4.</p>
     </div>
-    {items.map((item) => <div key={item.id} className="rounded-md border border-border p-3 space-y-2">
-      <div className="flex items-center justify-between gap-2 text-sm"><span className="truncate">{item.file.name} ({Math.ceil(item.file.size / 1024)} KB)</span>{item.status !== 'completed' && !submitting && <Button type="button" variant="ghost" size="sm" onClick={() => setItems((current) => current.filter((candidate) => candidate.id !== item.id))}>Remove</Button>}</div>
-      <Input value={item.title} disabled={submitting || item.status === 'completed'} placeholder="Title" onChange={(event) => updateItem(item.id, { title: event.target.value })} />
-      <Input value={item.caption} disabled={submitting || item.status === 'completed'} placeholder="Caption" onChange={(event) => updateItem(item.id, { caption: event.target.value })} />
+    {items.map((item) => <div key={item.id} className="rounded-md border border-border p-3 space-y-3">
+      <div className="flex items-center justify-between gap-2 text-sm"><span className="truncate">{item.file.name} ({Math.ceil(item.file.size / 1024)} KB)</span>{item.status !== 'completed' && !submitting && <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(item)}>Remove</Button>}</div>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        {item.file.type.startsWith('image/') ? <img src={item.previewUrl} alt={`Preview of ${item.file.name}`} className="h-28 w-full rounded-md border border-border object-cover sm:w-40" /> : <video src={item.previewUrl} controls preload="metadata" className="h-28 w-full rounded-md border border-border bg-black sm:w-40">Your browser cannot preview this video.</video>}
+        <div className="flex-1 space-y-2">
+          <Input value={item.title} disabled={submitting || item.status === 'completed'} placeholder="Title" onChange={(event) => updateItem(item.id, { title: event.target.value })} />
+          <Input value={item.caption} disabled={submitting || item.status === 'completed'} placeholder="Caption" onChange={(event) => updateItem(item.id, { caption: event.target.value })} />
+        </div>
+      </div>
       <p className="text-xs text-muted-foreground">{item.error ?? item.status}</p>
       {item.status === 'failed' && !submitting && <Button type="button" variant="outline" size="sm" onClick={() => updateItem(item.id, { status: 'queued', error: undefined })}>Retry upload</Button>}
     </div>)}
