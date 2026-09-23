@@ -139,7 +139,8 @@ export function downloadContent(item: ContentItem): void {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${item.title.replace(/\s+/g, '-').toLowerCase()}.txt`;
+    const baseName = item.title.trim().replace(/\s+/g, '-').toLowerCase() || `content-${item.id}`;
+    link.download = `${baseName}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

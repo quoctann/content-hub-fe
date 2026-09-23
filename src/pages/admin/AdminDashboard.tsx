@@ -23,10 +23,10 @@ import {
   adminCreateContent,
   adminDeleteContent,
   adminListContent,
+  adminSignOut,
   adminToggleHide,
   adminUpdateContent,
 } from '@/services/admin.service';
-import { useAuthStore } from '@/stores/auth.store';
 import type {
   AdminContentCreatePayload,
   AdminContentUpdatePayload,
@@ -41,7 +41,6 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const logout = useAuthStore((s) => s.logout);
 
   // ── Filter & Pagination state ─────────────────────────────────────────────
   const [filter, setFilter] = useState<AdminSearchFilter>({
@@ -263,8 +262,8 @@ export default function AdminDashboard() {
     }
   }
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await adminSignOut();
     navigate('/admin/login', { replace: true });
   }
 
