@@ -60,17 +60,22 @@ export interface PaginationMeta {
   has_more: boolean;
 }
 
-/** Matches `domain.Content` from the backend */
+/**
+ * Matches `ContentResponse` from the backend (internal/delivery/http/content_response.go).
+ * Every Go `*string` / `*time.Time` field is nullable and MUST be typed `T | null` here.
+ */
 export interface ApiContent {
   id: number;
-  title: string;
-  // Backend returns `text_data` for text content (nullable)
-  text_data?: string | null;
-  link: string;
+  title: string | null;
+  text_data: string | null;
+  ocr_text: string | null;
+  caption: string | null;
+  link: string | null;
   type: ContentType;
   rank: number; // Relevance rank from full-text search (0 if not searching)
-  created_at: string;
-  updated_at: string;
+  is_hidden: boolean;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 /** Matches `ContentSearchResponseWrapper` from the backend */
@@ -97,11 +102,12 @@ export function mapApiContent(apiContent: ApiContent): ContentItem {
   return {
     id: String(apiContent.id),
     type: apiContent.type,
-    title: apiContent.title,
-    content: apiContent.type === 'text' ? (apiContent.text_data ?? '') : apiContent.link,
+    // Null-safe: the UI type is non-nullable, so defaults are applied here, once.
+    title: apiContent.title ?? '',
+    content: (apiContent.type === 'text' ? apiContent.text_data : apiContent.link) ?? '',
     category: '', // Backend does not have category field
     rank: apiContent.rank || undefined, // Only include if rank > 0
-    createdAt: new Date(apiContent.created_at),
-    updatedAt: new Date(apiContent.updated_at),
+    createdAt: new Date(apiContent.created_at ?? 0),
+    updatedAt: new Date(apiContent.updated_at ?? 0),
   };
 }

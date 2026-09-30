@@ -30,6 +30,7 @@ import type {
   AdminMediaUploadResponse,
   AdminUploadLimits,
 } from '@/types/admin';
+import { useAuthStore } from '@/stores/auth.store';
 import axios from 'axios';
 
 // =============================================================================
@@ -65,6 +66,22 @@ export async function adminLogout(): Promise<void> {
       withCredentials: true,
     },
   );
+}
+
+/**
+ * Sign out of the admin session.
+ * Auth is stateless JWT, so logout is client-side cleanup, but the tokens live
+ * in HttpOnly cookies that JS cannot delete: the server must expire them via
+ * /account/logout. That call is best-effort; local state is cleared regardless.
+ */
+export async function adminSignOut(): Promise<void> {
+  try {
+    await adminLogout();
+  } catch {
+    // Network/server error: cookies will still expire on their own.
+  } finally {
+    useAuthStore.getState().logout();
+  }
 }
 
 // =============================================================================

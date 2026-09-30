@@ -30,7 +30,7 @@ export interface RefreshResponse {
 // Admin Content (full field set, including admin-only fields)
 // =============================================================================
 
-/** Matches the full ContentResponse from the backend (admin endpoints) */
+/** Matches `ContentResponse` from the backend (internal/delivery/http/content_response.go). */
 export interface AdminContent {
   id: number;
   title: string | null;
@@ -43,7 +43,6 @@ export interface AdminContent {
   rank: number;
   created_at: string | null;
   updated_at: string | null;
-  deleted_at: string | null;
 }
 
 /** Payload for creating a new content item */
