@@ -1,5 +1,5 @@
 import { useState, useCallback, type FormEvent } from 'react';
-import { Search, List, Grid3x3, Trash2 } from 'lucide-react';
+import { Search, List, Grid3x3, Trash2, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -64,9 +64,19 @@ export function SearchBar({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 150)}
             placeholder={placeholder}
-            className="pl-10"
+            className={query ? 'pl-10 pr-10' : 'pl-10'}
             autoFocus
           />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
         <Button type="submit">tìm</Button>
         {!isMobile && (
